@@ -142,21 +142,80 @@ print()
 print("########### PART 2 ###############")
 print()
 
-def processOne(variants, rules, curr, part, maxValue=4000):
+def doAllConditions(parts, condition, todo, accepted):
+
+    con, dest = condition
+    if con[1] == "<":
+        # print(condition, con, dest)
+        tArray = [max(0, parts[con[0]][0]), min(con[2] - 1, parts[con[0]][1])]
+        fArray = [max(con[2], parts[con[0]][0]), max(con[2], parts[con[0]][1])]
+
+        nPart1 = cp.deepcopy(parts)
+        nPart1[con[0]] = tArray
+        if dest == "A":
+            accepted.append(nPart1)
+            # return True, variants
+            # print("end mid A", nPart1)
+        elif dest == "R":
+            # print("end mid R", nPart1)
+            pass
+        else:
+            todo[dest] = nPart1
+
+        parts[con[0]] = fArray
+
+        # if curr == "rfg":
+        #     print("yay", con[0], curr)
+        #     print(todo)
+        #     print(tArray, fArray)
+
+    elif con[1] == ">":
+        # print(condition, con, dest)
+        tArray = [max(con[2]+1, parts[con[0]][0]), max(con[2], parts[con[0]][1])]
+        fArray = [max(0, parts[con[0]][0]), min(con[2], parts[con[0]][1])]
+
+        nPart1 = cp.deepcopy(parts)
+        nPart1[con[0]] = tArray
+        if dest == "A":
+            accepted.append(nPart1)
+            # print("end mid A", nPart1)
+            # return True, variants
+
+        elif dest == "R":
+            # print("end mid R", nPart1)
+            pass
+        else:
+            todo[dest] = nPart1
+
+        parts[con[0]] = fArray
+
+        # print("yolo", tArray, con[0], curr)
+        # print(data, tArray, fArray)
+        # return
+    # else:
+    #     print("sad")
+
+    return
+
+def processOne(accepted, rules, curr, parts, maxValue=4000, depth=0):
 
     todo = {}
 
     # print()
+    # print("depth", depth)
     # print("curr:", curr)
-    # print("part:", part)
+    # print("parts:", parts)
     # print("rule:", rules[curr])
+    # print("accepted", accepted)
 
     for condition in rules[curr]:
+
+        ## there is no conditions in current rule - just go to that destination
         if len(condition) == 1:
             # print("last condition")
             dest = condition[0]
             if dest == "A":
-                variants.append(part)
+                accepted.append(parts)
                 # print("end A", part)
                 # return True, variants
             elif dest == "R":
@@ -164,69 +223,46 @@ def processOne(variants, rules, curr, part, maxValue=4000):
                 pass
                 # return False, variants
             else:
-                todo[dest] = part
+                todo[dest] = parts
         else:
-            con, dest = condition
-            if con[1] == "<":
-                # print(condition, con, dest)
-                tArray = [max(0, part[con[0]][0]), min(con[2] - 1, part[con[0]][1])]
-                fArray = [max(con[2], part[con[0]][0]), max(con[2], part[con[0]][1])]
-
-                nPart1 = cp.deepcopy(part)
-                nPart1[con[0]] = tArray
-                if dest == "A":
-                    variants.append(nPart1)
-                    # return True, variants
-                    # print("end mid A", nPart1)
-                elif dest == "R":
-                    # print("end mid R", nPart1)
-                    pass
-                else:
-                    todo[dest] = nPart1
-
-                part[con[0]] = fArray
-
-                # if curr == "rfg":
-                #     print("yay", con[0], curr)
-                #     print(todo)
-                #     print(tArray, fArray)
-
-            elif con[1] == ">":
-                # print(condition, con, dest)
-                tArray = [max(con[2]+1, part[con[0]][0]), max(con[2], part[con[0]][1])]
-                fArray = [max(0, part[con[0]][0]), min(con[2], part[con[0]][1])]
-
-                nPart1 = cp.deepcopy(part)
-                nPart1[con[0]] = tArray
-                if dest == "A":
-                    variants.append(nPart1)
-                    # print("end mid A", nPart1)
-                    # return True, variants
-
-                elif dest == "R":
-                    # print("end mid R", nPart1)
-                    pass
-                else:
-                    todo[dest] = nPart1
-
-                part[con[0]] = fArray
-
-                # print("yolo", tArray, con[0], curr)
-                # print(data, tArray, fArray)
-                # return
-            # else:
-            #     print("sad")
-
+            doAllConditions(parts, condition, todo, accepted)
 
     # print(10*"-")
+    # print("accepted:")
+    # [print(x) for x in accepted]
     # print("TODO:")
     # [print(key, todo[key]) for key in todo.keys()]
     # print(10*"-")
-    for key in todo.keys():
-        succ, variants = processOne(variants, rules, key, todo[key])
+
+    if depth < 2 or True:
+        for key in todo.keys():
+            succ, accepted = processOne(accepted, rules, key, todo[key], depth=depth+1)
 
     # print(succ, variants)
-    return None, variants
+    return None, accepted
+
+def testBoundaries(parts, accepted):
+
+    print("testing")
+    for part in parts:
+        # print(part)
+        i=0
+        for acc in accepted:
+
+            ## check all parameters x,m,a,s
+            succ = True
+            for key in part.keys():
+                if not (part[key] >= acc[key][0] and part[key] <= acc[key][1]):
+                    succ = False
+                    break
+
+            if succ == True:
+                print(part, "Accepted", i)
+                break
+
+            i=i+1
+
+    return
 
 def solve2(data, maxSteps=100):
 
@@ -241,65 +277,25 @@ def solve2(data, maxSteps=100):
     # print()
 
     curr = "in"
-    variants = []
+    arr = []
 
-    part = {'x': [0,4000], 'm': [0,4000], 'a': [0,4000], 's': [0,4000]}
-    union = {'x': [], 'm': [], 'a': [], 's': []}
+    part = {'x': [1,4000], 'm': [1,4000], 'a': [1,4000], 's': [1,4000]}
 
-    i=0
-    while i < maxSteps:
-        res, variants = processOne(variants, rules, curr, part)
+    ## proccesing all borders of part number span
+    res, accepted = processOne(arr, rules, curr, part)
+    # print("accepted:")
+    # [print(x) for x in accepted]
 
-        # print(res)
-        break
+    # testBoundaries(parts, accepted)
 
-        i=i+1
-
-    print()
-    # print(variants)
-    print(len(variants))
-    for var in variants:
-        print(union)
-        print("yolo", var)
-        for key in var.keys():
-
-            if len(union[key]) == 0:
-                union[key].append(var[key])
-                print("yay")
-            else:
-
-                N = len(union[key])
-                add = []
-                inside = False
-                i=0
-                while i < N:
-
-                    if union[key][i][0] <= var[key][1] and union[key][i][1] >= var[key][0]:
-                        print(key, i, "inside")#, union[key][i][0] <= var[key][1], union[key][i][1] >= var[key][0])
-                        inside = True
-                        if union[key][i][0] > var[key][0]:
-                            union[key][i][0] = var[key][0]
-                        if union[key][i][1] < var[key][1]:
-                            union[key][i][1] = var[key][1]
-                    else:
-                        print(key, i, "outside")
-                        add = var[key]
-
-                    i=i+1
-
-                if inside == False and len(add) != 0:
-                    union[key].append(add)
-
-    print("after", union)
-    s = 1
-    for key in union.keys():
-        a = 0
-        i=0
-        while i < len(union[key]):
-            a = a + (union[key][i][1] - union[key][i][0])
-            i=i+1
-        s = s * a
-    solution = solution + s
+    ## There is ABSOLUTELY NO NEED to complicate this
+    ## just add the number of each accepted path
+    ## because they are already mutualy independant and they DO NOT overlap in any way
+    for acc in accepted:
+        m = 1
+        for cat in acc.keys():
+            m = m * (acc[cat][1]-acc[cat][0]+1)
+        solution = solution + m
 
     print()
     print("solution:", solution)
@@ -307,6 +303,7 @@ def solve2(data, maxSteps=100):
     return
 
 solve2(testData)
-print(9*" ", testSol2)
+# print("test sol:", testSol2)
+# print(9*" ", 4000**4)
 
-# solve2(data)
+solve2(data)

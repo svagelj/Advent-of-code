@@ -1,6 +1,7 @@
 import numpy as np
 import time
 import copy as cp
+import random
 
 fileName = "day12_data.txt"
 testData = ["???.### 1,1,3",".??..??...?##. 1,1,3","?#?#?#?#?#?#?#? 1,3,1,6",
@@ -140,76 +141,224 @@ print()
 print("########### PART 2 ###############")
 print()
 
+def getCode(line):
+
+    n = []
+    for char in line:
+        if char == "#":
+            if len(n) == 0:
+                n = [1]
+            else:
+                n[-1] = n[-1] + 1
+        elif len(n) != 0 and n[-1] != 0:
+            n.append(0)
+
+    if len(n) != 0 and n[-1] == 0:
+        del n[-1]
+    return n
+
+def isCurrentCodePossible(code, currentCode):
+
+    if len(currentCode) == 0:
+        return True
+    elif len(currentCode) > len(code):
+        return False
+    else:
+
+        N = len(currentCode)
+        i = 0
+        while i < N-1:
+        # for i,num in enumerate(currentCode):
+            if currentCode[i] != code[i]:
+                return False
+
+            i=i+1
+
+        if currentCode[-1] > code[N-1]:# or N == len(code):
+            return False
+
+
+    return True
+
+def trySetOnePosition2(line, position, code, N, ind, level):
+
+    # if level == 0 or True:
+    #     # [print(x) for x in [line, position, code, N, level]]
+    #     print("\ncurrent", line, position, code, N, ind, level)
+
+    ## Ending condition
+    if ind == len(position):
+        _code = getCode(line)
+        if len(_code) == len(code) and all(_code[i] - code[i] == 0 for i in range(len(code))):
+            N = N + 1
+            # print("succ, N:", True, N)
+            return True, N
+        else:
+            # print("succ, N:", False, N)
+            return False, N
+
+    pos = position[ind]
+    orgChar = line[pos]
+
+    maxInd = pos + 1
+    for char in line[maxInd:]:
+        if char != "#":
+            break
+        maxInd = maxInd + 1
+    # print("\t maxInd:", maxInd)
+
+    chars = [".", "#"]
+    random.shuffle(chars)
+    for char in chars:
+
+        line[pos] = char
+        # print("\t", pos, char)
+        # print("\t", "".join(line))
+
+        ## check if current string is possible for solution
+        # n, unknown = getIndexes(line[:maxInd])
+        # print("\t curr", line[:maxInd])
+        # print("\t", n)
+        # print("\t", unknown)
+
+        currentCode = getCode(line[:maxInd])
+        isPossible = isCurrentCodePossible(code, currentCode)
+        # print("\tcode", currentCode, isPossible)
+
+        # input("continue?")
+
+        if isPossible == True:
+            succ, N = trySetOnePosition2(line, position, code, N, ind+1, level+1)
+        # else:
+        #     print("\tthis one is not possible - skipping")
+
+        line[pos] = orgChar
+
+    # print(succ)
+    return None, N
+
+def stripDots(position):
+
+    newPos = []
+    for char in position:
+        if len(newPos) == 0 or not (char == "." and newPos[-1] == "."):
+            newPos.append(char)
+
+    return "".join(newPos)
+
+def solved(line, code):
+
+    # print()
+    # print(line, code)
+
+    ## key represents index where is the start of the search for current group number
+    ## value represents a counter of possible arrangements
+    ## at the start the value must be 1 because this will be added each time a succesfull arangement is found
+    ##      key must be 0 because this is the first index
+    positions = {0: 1}
+    # print("\t starting positions", positions)
+
+    ## loop over each group number
+    for i, nGroup in enumerate(code):
+
+        new_positions = {}
+
+        for start, counter in positions.items():
+
+            ## Length of the line MINUS sum of leftover codes PLUS lenth of array of leftover codes
+            ## WHY is this lenght as it is?
+            ## This is the amount of line to include in search for current group number (or interval)
+            ## it has to be long enough to include all posible combinations of this group number
+            ## and at the same time leave enough space for the rest of the group numbers
+            ## it is ended if start is '#'
+            length = len(line) - sum(code[i + 1:]) + len(code[i + 1:])
+            # print("\t", i, nGroup, "|", start,"to", length)
+            # print("\t", len(line), sum(code[i + 1:]), len(code[i + 1:]))
+
+            for n in range(start, length):
+                # print(2*"\t", n,"|", n + nGroup, line[n:n + nGroup])
+
+                ## we are looking at interval [n, n+nGroup]
+                ## i.e. from n to length of '#' there has to be according to 'code'
+                ## so on this interval we expect NO '.'
+
+                intervalEnd = n + nGroup
+
+                ## the whole interval must be inside the line and without '.'
+                if intervalEnd - 1 < len(line) and '.' not in line[n:intervalEnd]:
+
+                    ## if we are looking at last code group AND there are no '#' from this interval onwards
+                    ##      that means we reached the end of the string and all group numbers are done
+                    ## or any other code group AND this interval is within the whole line AND '#' is not the first char after this interval
+                    ##      this means that the number group ended cleanly, with '.' just after this group
+
+                    if (i == len(code) - 1 and '#' not in line[intervalEnd:]) or \
+                        (i < len(code) - 1 and intervalEnd < len(line) and '#' != line[intervalEnd]):
+
+                        ## increase the counter for current group number
+                        ## value of key is used as index position to start the next search
+
+                        # print(3*"\t", "yay", n, intervalEnd)
+
+                        if intervalEnd + 1 in new_positions:
+                            new_positions[intervalEnd + 1] = new_positions[intervalEnd + 1] + counter
+                        else:
+                            new_positions[intervalEnd + 1] = counter
+
+                        # print(new_positions)
+
+                ## stop this group search if first element of interval [n, n+nGroup] is '#'
+                ## because that means that the next group number has started, so we end the current one
+                if line[n] == '#':
+                    # print(4*"\t", "break")
+                    break
+
+            # raise Exception("trol")
+
+        ## if this dictionary is empty, there are no solutions
+        ## if there are solutions for this group number, the next search start is behind the end of this group number
+        positions = new_positions
+        # print("\t new positions", positions)
+
+
+    N =  sum(positions.values())
+
+    return N
+
 def solve2(data, rng=5):
 
     solution = 0
 
     M = len(data)
-    for i, line in enumerate(data):
+    for i, line in enumerate(data[::]):
 
-        if i % 50 == 0:
-            print(i, "/", M)
+        # print()
+
+        # if i % 10 == 0:
+        #     print(i, "/", M)
         # line = data[1]
         # line = '???..######..#####. 1,6,5'
 
-        # print()
         # print(line.split())
 
-        pos0 = list(line.split()[0])
+        pos0 = line.split()[0]
+        pos0 = stripDots(pos0)
+
         code0 = [int(x) for x in line.split()[1].split(",")]
-        pos = pos0
-        code = code0
-        for x in range(rng-1):
-            pos = pos + ["?"] + pos0
-            code = code + code0
-
-        # print("".join(pos))
-        # print(code)
-        # return
-
-        # .??..??...?##.?.??..??...?##.
+        pos = list("?".join(rng*[pos0]))
+        code = rng*code0
 
         n, unknown = getIndexes(pos)
-        succ, N = trySetOnePosition(pos, unknown[0], code, N=0, level=0)
-        # print("n", n)
 
-        # # borderN = 0
-        # if rng > 1:
-        #     border = []
-        #     # _pos = pos + ["?"] + pos
+        # print("---")
+        # print("".join(pos))
+        # print(code, len(unknown))
+        # return
 
-        #     bs = pos[::-1].index("#")
-        #     be = pos.index("#")
+        # succ, N = trySetOnePosition2(pos, unknown, code, N=0, ind=0, level=0)
+        N = solved("".join(pos), code)
+        # print("N", N)
 
-        #     borderStart = 0
-        #     allow = False
-        #     for j, char in enumerate(pos[::-1]):
-        #         print(j, char)
-        #         if char == "#":
-        #             allow = True
-        #         if char == "." and allow == True:
-        #             break
-
-        #     border = pos[-j:n[-1][-1]+1] + pos[::-1][:bs][::-1] + ["?"] + pos[:be] + pos[n[0][0]:n[0][-1]+1]
-        #     _n, _unknown = getIndexes(border)
-
-        #     __n = len(code) - len(_n)
-        #     _code = [code[-1]] + code[:__n+2]
-
-        #     # print("pos", "".join(_pos))
-        #     print("border", "".join(border))
-        #     print("_code ", _code)
-        #     # return
-
-        #     n, unknown = getIndexes(border)
-        #     # print(n, unknown, code, [1, _code, 1])
-        #     print("code", code, n, __n,  _code)
-
-        #     succ, borderN = trySetOnePosition(border, unknown[0], _code, N=0, level=0)
-        #     print("border N:", N, borderN, N*borderN**rng)
-
-        #     solution = solution + N*borderN**(rng-1)
-        # else:
         solution = solution + N
         # break
 
@@ -223,6 +372,6 @@ t1 = time.time()
 # solve2(testData, 2)
 # solve2(testData, 3)
 # solve2(testData, 4)
-# solve2(testData, 5)
+solve2(testData, 5)
 solve2(data, 5)
 print("elapsed:", round((time.time()-t1)/60., 2), "min")

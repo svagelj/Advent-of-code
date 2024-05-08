@@ -6,7 +6,10 @@ import matplotlib.pyplot as plt
 fileName = "day21_data.txt"
 testData1 = ["...........",".....###.#.",".###.##..#.","..#.#...#..","....#.#....",".##..S####.",
              ".##..#...#.",".......##..",".##.#.####.",".##..##.##.","..........."]
+testSteps1 = 6
 testSol1 = 16
+testSteps2 = [6, 10, 50, 100, 500, 1000, 5000]
+testSols2 = [16, 50, 1594, 6536, 167004, 668697, 16733044]
 
 def readFile():
 
@@ -139,6 +142,9 @@ def getPossibleSteps2(data, position, N,M):
     i2 = i%N
     j2 = j%M
 
+    print("i", i, i2)
+    print("j", j, j2)
+
     # print("yolo", position, N,M, "|", i2,j2)
 
     if data[i2-1][j2] != "#":
@@ -174,6 +180,21 @@ def isStepsInHistory(history, steps):
 
     return False, None
 
+def printPositions(data, positions, N,M):
+
+    _data = cp.deepcopy(data)
+
+    for pos in positions:
+        # print(pos)
+        i,j = pos
+        i2 = i%N
+        j2 = j%M
+        _data[i2][j2] = "O"
+
+    [print(" ".join(list(x))) for x in [[ y for y in x] for x in _data]]
+
+    return
+
 def solve2(data, maxSteps=26501365):
 
     solution = 0
@@ -190,41 +211,63 @@ def solve2(data, maxSteps=26501365):
     history = [[start]]
     sols = [1]
 
-    # print(getPossibleSteps2(data, [N,5], N,M))
-    # return
+    print("N,M", N,M)
+    print(getPossibleSteps2(data, [N,4], N,M))
+    print(getPossibleSteps2(data, [6+(N*105),8+(M*5)], N,M))
+    print(getPossibleSteps2(data, [2+(5*N),4+(M*10)], N,M))
+
+    print("testing")
+    _data = np.array(data)
+    print(_data[start[0], :])
+    print(_data[:, start[1]])
+    return
 
     i=0
     while i < maxSteps:
 
-        # print()
+        if i in testSteps2:
+            print("yay", i, testSols2[testSteps2.index(i)], "|", len(positions))
+            printPositions(data, positions, N,M)
+
+        print()
         print(i)
         _pos = []
+        _pos = set()
         for pos in positions:
             steps = getPossibleSteps2(data, pos, N, M)
             # print("possible", pos, steps)
-            _pos = _pos + steps
+            # _pos = _pos + steps
 
-        _pos = removeDuplicateSteps(_pos)
+            for step in steps:
+                _pos.add(tuple(step))
 
+        # printPositions(data, _pos, N,M)
+
+        # _pos = removeDuplicateSteps(_pos)
         positions = cp.deepcopy(_pos)
 
         history.append(cp.deepcopy(_pos))
         sols.append(len(positions))
         # print("history", isHistory, ind)
 
-        if i > 50:
+        if i > 5:
             break
 
         i=i+1
 
-    print(sols)
-    xs = [6, 10, 50]
-    [print(x, sols[x]) for x in xs]
+    print("done")
 
-    x = np.arange(len(sols))
-    plt.figure()
-    plt.plot(x, sols, "x-")
-    plt.show()
+    print("sols", sols)
+    xs = [6, 10, 50]
+    # xs = [6]
+    # [print(x, sols[x]) for x in xs]
+
+    # x = np.arange(len(sols))
+    # plt.figure()
+    # plt.plot(x, sols, "x-")
+    # plt.show()
+
+    printPositions(data, _pos, N,M)
 
     print("solution:", solution)
 
@@ -232,4 +275,11 @@ def solve2(data, maxSteps=26501365):
 
 
 data = readFile()
+
+t1 = time.time()
 solve2(testData1)
+print("elapsed", round(time.time()-t1, 2), "s")
+
+# t1 = time.time()
+# solve2(data)
+# print("elapsed", round(time.time()-t1, 2), "s")
