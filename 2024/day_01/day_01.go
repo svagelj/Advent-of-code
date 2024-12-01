@@ -129,7 +129,7 @@ func main() {
 	// data gathering and parsing
 	testData := initData(testData1, false)
 
-	fileName := "day01_data.txt"
+	fileName := "day_01_data.txt"
 	fmt.Println("Reading file '" + fileName + "'")
 	lines := rw.ReadFile(fileName)
 	fileData := initData(lines, false)
@@ -137,7 +137,7 @@ func main() {
 	// ---------------------------------------------
 	fmt.Println("=== Part 1 ===")
 	sol1_test := solve1(testData, false)
-	fmt.Println("Test solution =", sol1_test, "---", checkSolution(sol1_test, testSolution1))
+	fmt.Println("Test solution =", sol1_test, "->", checkSolution(sol1_test, testSolution1))
 
 	sol1 := solve1(fileData, false)
 	fmt.Println("Solution part =", sol1)
@@ -145,7 +145,7 @@ func main() {
 	// ---------------------------------------------
 	fmt.Println("=== Part 2 ===")
 	sol2_test := solve2(testData, false)
-	fmt.Println("Test solution =", sol2_test, "---", checkSolution(sol2_test, testSolution2))
+	fmt.Println("Test solution =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
 
 	sol2 := solve2(fileData, false)
 	fmt.Println("Solution part =", sol2)
