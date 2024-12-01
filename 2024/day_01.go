@@ -18,6 +18,16 @@ var testData1 = []string{
 	"3   3",
 }
 
+var testSolution1, testSolution2 = 11, 31
+
+func checkSolution(testValue int, solValue int) string {
+	if testValue == solValue {
+		return "passed"
+	} else {
+		return "failed"
+	}
+}
+
 func initData(fileLiens []string, printout bool) [][]int {
 
 	column1 := []int{}
@@ -122,21 +132,21 @@ func main() {
 	fileName := "day01_data.txt"
 	fmt.Println("Reading file '" + fileName + "'")
 	lines := rw.ReadFile(fileName)
-	data := initData(lines, false)
+	fileData := initData(lines, false)
 
 	// ---------------------------------------------
-	// part 1
-	sol10 := solve1(testData, false)
-	fmt.Println("Test solution 1 =", sol10)
+	fmt.Println("=== Part 1 ===")
+	sol1_test := solve1(testData, false)
+	fmt.Println("Test solution =", sol1_test, "---", checkSolution(sol1_test, testSolution1))
 
-	sol1 := solve1(data, false)
-	fmt.Println("Solution part 1 =", sol1)
+	sol1 := solve1(fileData, false)
+	fmt.Println("Solution part =", sol1)
 
 	// ---------------------------------------------
-	// part 2
-	sol20 := solve2(testData, false)
-	fmt.Println("Test solution 2 =", sol20)
+	fmt.Println("=== Part 2 ===")
+	sol2_test := solve2(testData, false)
+	fmt.Println("Test solution =", sol2_test, "---", checkSolution(sol2_test, testSolution2))
 
-	sol2 := solve2(data, false)
-	fmt.Println("Solution part 2 =", sol2)
+	sol2 := solve2(fileData, false)
+	fmt.Println("Solution part =", sol2)
 }
