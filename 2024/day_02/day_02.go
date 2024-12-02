@@ -15,8 +15,6 @@ var testData1 = []string{
 	"1 3 2 4 5",
 	"8 6 4 4 1",
 	"1 3 6 7 9",
-
-	"1 3 3 2 4",
 }
 
 var testSolution1, testSolution2 = 2, 4
@@ -255,7 +253,4 @@ func main() {
 
 	sol2 := solve2(fileData, false)
 	fmt.Println("Solution part 2 =", sol2)
-
-	// a := []int {1,2,3,4,5,6}
-	// fmt.Println("YOLO", a[:5])
 }

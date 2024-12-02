@@ -12,6 +12,8 @@ func PrintHello() {
 
 func ReadFile(fileName string) []string {
 
+	fmt.Println("Reading file '" + fileName + "'")
+
 	// open the file
 	f, err := os.Open(fileName)
 
