@@ -15,6 +15,8 @@ var testData1 = []string{
 	"1 3 2 4 5",
 	"8 6 4 4 1",
 	"1 3 6 7 9",
+
+	"1 3 3 2 4",
 }
 
 var testSolution1, testSolution2 = 2, 4
@@ -76,35 +78,39 @@ func absInt(a int) int {
 	}
 }
 
+func checkOneReport1(report []int, minD int, maxD int, ) int {
+
+	sign := 0
+	var d int
+	for j := 0; j < len(report) - 1; j++ {
+
+		d = report[j] - report[j+1]
+
+		if absInt(d) < minD || absInt(d) > maxD || ((d > 0 && sign == -1) || (d < 0 && sign == 1)) {
+			return 0
+		}
+
+		// Get sign of the difference -> increasing or decreasing levels
+		if report[j] > report[j+1] {
+			sign = 1
+		} else {
+			sign = -1
+		}
+	}
+
+	return 1
+}
+
 func solve1(data [][]int, printout bool) int {
 
 	minD := 1
 	maxD := 3
 
 	var isSafe int
-	var sign int
 	sum := 0
-	var d int
 	for i := range data {
 
-		sign = 0
-		isSafe = 1
-		for j := 0; j < len(data[i]) - 1; j++ {
-
-			d = data[i][j] - data[i][j+1]
-
-			if absInt(d) < minD || absInt(d) > maxD || ((d > 0 && sign == -1) || (d < 0 && sign == 1)) {
-				isSafe = 0
-				break
-			}
-
-			// Get sign of the difference -> increasing or decreasing levels
-			if data[i][j] > data[i][j+1] {
-				sign = 1
-			} else {
-				sign = -1
-			}
-		}
+		isSafe = checkOneReport1(data[i], minD, maxD)
 
 		if printout == true {
 			fmt.Printf("%2d: %v => %d\n", i+1, data[i], isSafe)
@@ -116,70 +122,58 @@ func solve1(data [][]int, printout bool) int {
 	return sum
 }
 
-func checkOneReport(_report []int, minD int, maxD int, maxMistakes int) int {
+func checkOneReport2(_report []int, minD int, maxD int) int {
 
-	nMistakes := 0
+	// This approach is not ok because it wrongly skips some edge cases
+	// Idea is this. Go trough element by element in given report and compare it with the next one.
+	// If this pair is legal, move forward by one
+	// If this pair causes error, remove each of the elements in this pair and recheck again the resulting shorter report
+
 	sign := 0
 	isSafe := 1
 	var isSafeA, isSafeB int
 	var sliceA, sliceB []int
 
 	report := append([]int{}, _report...)
-	fmt.Println("\tchecking", _report)
+	// fmt.Println("\tchecking", _report)
 
 	var d int
-	j := 0
-	for j < len(report) - 1 {
+	for j := 0; j < len(report) - 1; j++ {
 
 		d = report[j] - report[j+1]
 
 		if absInt(d) < minD || absInt(d) > maxD || ((d > 0 && sign == -1) || (d < 0 && sign == 1)) {
-			nMistakes = nMistakes + 1
-			fmt.Printf("\t\tmistake at j = %d, %d\n", j, report[j])
+			// error in current compare pair was found
+			// try to remove each element of the pair
 
-			if nMistakes > maxMistakes {
-				// fmt.Println("\t\tmistakes are bad", nMistakes, maxMistakes, report)
-				return 0
-			} else {
-				isSafeA, isSafeB = 0,0
+			fmt.Printf("\t\tmistake at j = %d, (%d, %d)\n", j, report[j], report[j+1])
 
-				// Skip first element of this comparison
-				fmt.Println("\t\tskip first element")
-				if (j != 0){
-					sliceA = append([] int {}, report[:j-1]...)
-					sliceA = append(sliceA, report[j:]...)
-				} else {
-					sliceA = report[1:]
-				}
-				fmt.Println("\t\tyay1", sliceA)
-				isSafeA = checkOneReport(sliceA, minD, maxD, 0)
-				fmt.Println("\t   ", sliceA, "->", isSafeA)
+			// Skip first element of this comparison
+			sliceA = append([] int {}, report[:j]...)
+			sliceA = append(sliceA, report[j+1:]...)
+			isSafeA = checkOneReport1(sliceA, minD, maxD)
+			fmt.Println("\t", sliceA, "->", isSafeA)
 
-				// Skip second element of this comparison
-				if j != len(report) - 1{
-					fmt.Println("\t\tskip second element a")
-					sliceB = append([] int {}, report[:j]...)
-					sliceB = append(sliceB, report[j+1:]...)
-					// fmt.Println("\t\tyaya", sliceB)
-					isSafeB = checkOneReport(sliceB, minD, maxD, 0)
-					fmt.Println("\t   ", sliceB, "-->", isSafeB)
-				} else {
-					fmt.Println("\t\tskip second element b")
-					isSafeB = checkOneReport(report[:j], minD, maxD, 0)
-					fmt.Println("\t   ", report[:j], "==>", isSafeB)
-				}
+			if isSafeA == 1 {
+				return 1
 			}
 
-			if isSafeA == 0 && isSafeB == 0 {
-				// if isSafeA == 0 {
-				// 	fmt.Println("\t\t A is bad", report)
-				// }
-				// if isSafeB == 0 {
-				// 	fmt.Println("\t\t B is bad", report)
-				// }
-				return 0
+			// Skip second element of this comparison
+			if j == len(report) - 1 {
+				sliceB = report[:len(report)-1]
+				isSafeB = checkOneReport1(sliceB, minD, maxD)
+				fmt.Println("\t", sliceB, "__>", isSafeB)
 			} else {
+				sliceB = append([] int {}, report[:j+1]...)
+				sliceB = append(sliceB, report[j+2:]...)
+				isSafeB = checkOneReport1(sliceB, minD, maxD)
+				fmt.Println("\t", sliceB, "-->", isSafeB)
+			}
+
+			if isSafeA == 1 || isSafeB == 1 {
 				return 1
+			} else {
+				return 0
 			}
 		}
 
@@ -189,8 +183,6 @@ func checkOneReport(_report []int, minD int, maxD int, maxMistakes int) int {
 		} else {
 			sign = -1
 		}
-
-		j++
 	}
 
 	return isSafe
@@ -200,7 +192,6 @@ func solve2(data [][]int, printout bool) int {
 
 	minD := 1
 	maxD := 3
-	maxMistakes := 1
 
 	var isSafe int
 	sum := 0
@@ -210,7 +201,24 @@ func solve2(data [][]int, printout bool) int {
 			fmt.Printf("%2d: %v\n", i+1, data[i])
 		}
 
-		isSafe = checkOneReport(data[i], minD, maxD, maxMistakes)
+		// Wrong approach
+		// isSafe = checkOneReport2(data[i], minD, maxD)
+
+		// Nuclear option: remove every element one by one but only if whole report is unsafe
+		isSafe = checkOneReport1(data[i], minD, maxD)
+		if isSafe == 0 {
+			for j := 0; j < len(data[i]); j++ {
+				report := append([] int {}, data[i][:j]...)
+				report = append(report, data[i][j+1:]...)
+				// fmt.Println("\t", report)
+
+				_isSafe := checkOneReport1(report, minD, maxD)
+				if _isSafe == 1 {
+					isSafe = 1
+					break
+				}
+			}
+		}
 
 		if printout == true {
 			fmt.Printf("     => %d\n", isSafe)
@@ -225,7 +233,7 @@ func solve2(data [][]int, printout bool) int {
 func main() {
 
 	// data gathering and parsing
-	testData := initData(testData1, true)
+	testData := initData(testData1, false)
 
 	fileName := "day_02_data.txt"
 	fmt.Println("Reading file '" + fileName + "'")
@@ -238,15 +246,15 @@ func main() {
 	fmt.Println("Test solution =", sol1_test, "->", checkSolution(sol1_test, testSolution1))
 
 	sol1 := solve1(fileData, false)
-	fmt.Println("Solution part =", sol1)
+	fmt.Println("Solution part 1 =", sol1)
 
 	// ---------------------------------------------
 	fmt.Println("=== Part 2 ===")
 	sol2_test := solve2(testData, true)
 	fmt.Println("Test solution =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
 
-	// sol2 := solve2(fileData, true)
-	// fmt.Println("Solution part =", sol2)
+	sol2 := solve2(fileData, false)
+	fmt.Println("Solution part 2 =", sol2)
 
 	// a := []int {1,2,3,4,5,6}
 	// fmt.Println("YOLO", a[:5])
