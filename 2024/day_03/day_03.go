@@ -225,24 +225,25 @@ func solve2(data []string, printout bool) int {
 		for j := 0; j<len(data[i])-3; j++ {
 
 			maxIndDo := minInt(j + 4, len(data[i]))
-			maxIndDont := minInt(j + 7, len(data[i]))
-
 			foundDo := strings.Contains(data[i][j:maxIndDo], "do()")
-			foundDont := strings.Contains(data[i][j:maxIndDont], "don't()")
-			
+
 			if foundDo {
 				// fmt.Println(data[i][j:maxInd1])
 				if printout {
 					fmt.Println("Found 'do()'")
 				}
 				allowToMultiply = true
-			}
-			if foundDont {
-				// fmt.Println(data[i][j:maxInd2])
-				if printout {
-					fmt.Println("Found 'don't()'")
+
+			} else {
+				maxIndDont := minInt(j + 7, len(data[i]))
+				foundDont := strings.Contains(data[i][j:maxIndDont], "don't()")
+				if foundDont {
+					// fmt.Println(data[i][j:maxInd2])
+					if printout {
+						fmt.Println("Found 'don't()'")
+					}
+					allowToMultiply = false
 				}
-				allowToMultiply = false
 			}
 
 			if allowToMultiply {
@@ -262,18 +263,13 @@ func solve2(data []string, printout bool) int {
 
 func main() {
 
-	// data gathering and parsing
-	// testData := initData(testData1, true)
-	testData := append([]string{}, testData1...)
-
 	fileName := "day_03_data.txt"
 	lines := rw.ReadFile(fileName)
-	// fileData := initData(lines, false)
 	fileData := append([]string{}, lines...)
 
 	// ---------------------------------------------
 	fmt.Println("=== Part 1 ===")
-	sol1_test := solve1(testData, true)
+	sol1_test := solve1(testData1, true)
 	fmt.Println("Test solution 1 =", sol1_test, "->", checkSolution(sol1_test, testSolution1))
 
 	sol1 := solve1(fileData, false)
@@ -282,7 +278,7 @@ func main() {
 	// // ---------------------------------------------
 	fmt.Println("")
 	fmt.Println("=== Part 2 ===")
-	sol2_test := solve2(testData2, false)
+	sol2_test := solve2(testData2, true)
 	fmt.Println("Test solution 2 =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
 
 	sol2 := solve2(fileData, false)
