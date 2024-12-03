@@ -12,7 +12,11 @@ var testData1 = []string{
 	"xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))",
 }
 
-var testSolution1, testSolution2 = 161, 999
+var testData2 = [] string {
+	"xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))",
+}
+
+var testSolution1, testSolution2 = 161, 48
 
 // ----------------------------------------------------------------------
 
@@ -30,6 +34,22 @@ func absInt(a int) int {
 	} else {
 		return a
 	}
+}
+
+func minInt(a int, b int) int {
+	if a > b {
+		return b
+	} 
+
+	return a
+}
+
+func maxInt(a int, b int) int {
+	if a > b {
+		return a
+	} 
+
+	return b
 }
 
 func stringToInt(str string) int {
@@ -158,22 +178,81 @@ func solve1(data []string, printout bool) int {
 
 // ----------------------------------------------------------------------
 
-func solve2(data [][]int, printout bool) int {
+func tryToMultiply(dataLine string, j int, printout bool) int {
 
-	var isSafe int
+	substringStart := dataLine[j:j+4]
+			containsBeginning := strings.Contains(substringStart, "mul(")
+
+	if containsBeginning == true {
+		maxInd := j+12
+		if maxInd > len(dataLine) {
+			maxInd = len(dataLine)
+		}
+		maxSubstring := dataLine[j:maxInd]
+
+		if printout {
+			fmt.Println("try", maxSubstring)
+		}
+
+		commaInd, endInd := findCommaAndEnd(maxSubstring[4:])
+		
+		if commaInd != -1 && endInd != -1 {
+			firstNumber := stringToInt(maxSubstring[4:4+commaInd])
+			secondNumber := stringToInt(maxSubstring[4+commaInd+1:4+endInd])
+			mul := firstNumber*secondNumber
+
+			if printout {
+				fmt.Println("\tFirst number ", firstNumber)
+				fmt.Println("\tSecond number", secondNumber)
+				fmt.Println("\tyay", substringStart, "->", maxSubstring, "=>", mul)
+			}
+
+			return mul
+		}
+	}
+
+	return 0
+}
+
+func solve2(data []string, printout bool) int {
+
+	allowToMultiply := true
+	var mul int
 	sum := 0
 	for i := range data {
 
-		if printout == true {
-			fmt.Printf("%2d: %v\n", i+1, data[i])
+		mul = 0
+		for j := 0; j<len(data[i])-3; j++ {
+
+			maxIndDo := minInt(j + 4, len(data[i]))
+			maxIndDont := minInt(j + 7, len(data[i]))
+
+			foundDo := strings.Contains(data[i][j:maxIndDo], "do()")
+			foundDont := strings.Contains(data[i][j:maxIndDont], "don't()")
+			
+			if foundDo {
+				// fmt.Println(data[i][j:maxInd1])
+				if printout {
+					fmt.Println("Found 'do()'")
+				}
+				allowToMultiply = true
+			}
+			if foundDont {
+				// fmt.Println(data[i][j:maxInd2])
+				if printout {
+					fmt.Println("Found 'don't()'")
+				}
+				allowToMultiply = false
+			}
+
+			if allowToMultiply {
+				mul = tryToMultiply(data[i], j, printout)
+				if mul != 0 {
+					sum = sum + mul
+				}
+			}
+			
 		}
-
-
-		if printout == true {
-			fmt.Printf("     => %d\n", isSafe)
-		}
-
-		sum = sum + isSafe
 	}
 
 	return sum
@@ -195,18 +274,19 @@ func main() {
 	// ---------------------------------------------
 	fmt.Println("=== Part 1 ===")
 	sol1_test := solve1(testData, true)
-	fmt.Println("Test solution =", sol1_test, "->", checkSolution(sol1_test, testSolution1))
+	fmt.Println("Test solution 1 =", sol1_test, "->", checkSolution(sol1_test, testSolution1))
 
 	sol1 := solve1(fileData, false)
 	fmt.Println("Solution part 1 =", sol1)
 
 	// // ---------------------------------------------
-	// fmt.Println("=== Part 2 ===")
-	// sol2_test := solve2(testData, true)
-	// fmt.Println("Test solution =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
+	fmt.Println("")
+	fmt.Println("=== Part 2 ===")
+	sol2_test := solve2(testData2, false)
+	fmt.Println("Test solution 2 =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
 
-	// sol2 := solve2(fileData, false)
-	// fmt.Println("Solution part 2 =", sol2)
+	sol2 := solve2(fileData, false)
+	fmt.Println("Solution part 2 =", sol2)
 
 	// a := "0123456"
 	// fmt.Println(a[2:3])
