@@ -1,7 +1,7 @@
 package main
 
 import (
-	rw "aoc_2024/tools"
+	rw "aoc_2024/tools/rw"
 	"fmt"
 	"strconv"
 	"strings"

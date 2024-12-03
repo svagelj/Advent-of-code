@@ -1,4 +1,4 @@
-package rw
+package tools
 
 import (
 	"bufio"
@@ -6,9 +6,7 @@ import (
 	"os"
 )
 
-func PrintHello() {
-	fmt.Println("Hello from the inside!")
-}
+// Functions with names starting with upper case are exported
 
 func ReadFile(fileName string) []string {
 
