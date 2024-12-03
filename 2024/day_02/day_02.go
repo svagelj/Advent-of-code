@@ -122,7 +122,7 @@ func solve1(data [][]int, printout bool) int {
 
 func checkOneReport2(_report []int, minD int, maxD int) int {
 
-	// This approach is not ok because it wrongly skips some edge cases
+	// This approach is not ok because it wrongly skips some edge cases -> "9 12 11 8 7" is deemed unsafe if one removed (remove 9), even though it is save
 	// Idea is this. Go trough element by element in given report and compare it with the next one.
 	// If this pair is legal, move forward by one
 	// If this pair causes error, remove each of the elements in this pair and recheck again the resulting shorter report
