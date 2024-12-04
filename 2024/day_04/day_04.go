@@ -120,8 +120,6 @@ func solve1(data []string, target string, printout bool) int {
 				fmt.Println("found at:", i,j, "n =", n)
 			}
 		}
-
-		// break
 	}
 
 	return sum
@@ -134,42 +132,16 @@ func findTarget2(data []string, i int, j int, target string) int {
 	n := len(data)
 	m := len(data[i])
 	targetR := rw.ReverseString(target)
+	maxJ := Math.MinInt(j+len(target), m)
+	maxI := Math.MinInt(i+len(target), n)
+	halfTarget:= len(target) / 2
 	N := 0
 
 	// fmt.Println(i,j, target)
 
-	// check horizontal
-	maxJ := Math.MinInt(j+len(target), m)
-	// fmt.Println("\t", data[i][j:maxJ], strings.Contains(data[i][j:maxJ], target))
-	// fmt.Println("\t", data[i][j:maxJ], strings.Contains(data[i][j:maxJ], targetR))
-	if strings.Contains(data[i][j:maxJ], target) == true {
-		N++
-	}
-	if strings.Contains(data[i][j:maxJ], targetR) == true {
-		N++
-	}
-
-	// check vertical
-	maxI := Math.MinInt(i+len(target), n)
-	vertStr := ""
-	for k := range len(target) {
-		if k+i >= maxI {
-			break
-		}
-		vertStr = vertStr + string(data[i+k][j])
-	}
-	// fmt.Println("\t", vertStr, strings.Contains(vertStr, target))
-	// fmt.Println("\t", vertStr, strings.Contains(vertStr, targetR))
-	if strings.Contains(vertStr, target) == true {
-		N++
-	}
-	if strings.Contains(vertStr, targetR) == true {
-		N++
-	}
-
 	// diagonal +,+
 	diag1 := ""
-	for k := range len(target) {
+	for k := -halfTarget; k < halfTarget+1; k++ {
 		if k+i >= maxI || k+j >= maxJ {
 			break
 		}
@@ -177,16 +149,13 @@ func findTarget2(data []string, i int, j int, target string) int {
 	}
 	// fmt.Println("\t", diag1, strings.Contains(diag1, target))
 	// fmt.Println("\t", diag1, strings.Contains(diag1, targetR))
-	if strings.Contains(diag1, target) == true {
-		N++
-	}
-	if strings.Contains(diag1, targetR) == true {
+	if strings.Contains(diag1, target) == true || strings.Contains(diag1, targetR) == true {
 		N++
 	}
 
 	// diagonal +,-
 	diag2 := ""
-	for k := range len(target) {
+	for k := -halfTarget; k < halfTarget+1; k++ {
 		if i+k >= maxI || j-k < 0 {
 			break
 		}
@@ -194,32 +163,33 @@ func findTarget2(data []string, i int, j int, target string) int {
 	}
 	// fmt.Println("\t", diag2, strings.Contains(diag2, target))
 	// fmt.Println("\t", diag2, strings.Contains(diag2, targetR))
-	if strings.Contains(diag2, target) == true {
-		N++
-	}
-	if strings.Contains(diag2, targetR) == true {
+	if strings.Contains(diag2, target) == true || strings.Contains(diag2, targetR) == true {
 		N++
 	}
 
-	return N
+	if N == 2 {
+		return 1
+	} else {
+		return 0
+	}
 }
 
 func solve2(data []string, target string, printout bool) int {
 
+	halfTarget := len(target) / 2
+
 	sum := 0
-	for i := range data {
+	for i := halfTarget; i < len(data)-halfTarget; i++ {
 		// fmt.Println("yay:", data[i])
 
 		n := 0
-		for j := range data[i] {
+		for j := halfTarget; j < len(data[i])-halfTarget; j++ {
 			n = findTarget2(data, i, j, target)
 			sum = sum + n
 			if printout && n > 0 {
 				fmt.Println("found at:", i,j, "n =", n)
 			}
 		}
-
-		// break
 	}
 
 	return sum
@@ -243,10 +213,12 @@ func main() {
 	fmt.Println("Solution part 1 =", sol1)
 
 	// ---------------------------------------------
-	// fmt.Println("=== Part 2 ===")
-	// sol2_test := solve2(testData1, "MAS", true)
-	// fmt.Println("Test solution =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
+	fmt.Println("=== Part 2 ===")
+	sol2_test := solve2(testData1, "MAS", true)
+	fmt.Println("Test solution =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
 
-	// sol2 := solve2(fileData, false)
-	// fmt.Println("Solution part 2 =", sol2)
+	sol2 := solve2(fileData, "MAS", false)
+	fmt.Println("Solution part 2 =", sol2)
+
+	// fmt.Println("yolo", 4/2, 3/2)
 }
