@@ -37,3 +37,14 @@ func ReadFile(fileName string) []string {
 	return fileLines
 
 }
+
+func ReverseString(inputStr string) string {
+
+	reversed := ""
+
+	for i := len(inputStr) - 1; i >= 0; i-- {
+		reversed += string(inputStr[i])
+	}
+
+	return reversed
+}
