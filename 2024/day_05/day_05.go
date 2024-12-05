@@ -197,24 +197,38 @@ func solve1(rules [][]int, updates [][]int, printout bool) int {
 
 //----------------------------------------
 
-func orderAnUpdate(update []int, rules [][]int) []int {
+func orderAnUpdate(update []int, rules [][]int, maxIter int) []int {
 
 	orderedUpdate := append([]int {}, update...)
-	fmt.Println("update:", update)
+	// fmt.Println("update:", update)
 
-	for i := range rules {
+	for k := range maxIter {
+		// fmt.Println("iter", k)
+		for i := range rules {
 
-		ind1 := getIndexInt(orderedUpdate, rules[i][0])
-		ind2 := getIndexInt(orderedUpdate, rules[i][1])
+			ind1 := getIndexInt(orderedUpdate, rules[i][0])
+			ind2 := getIndexInt(orderedUpdate, rules[i][1])
 
-		if ind1 != -1 && ind2 != -1 {
-			if ind1 > ind2 {
-				fmt.Println("  broken rule:", rules[i], "switch:", ind1, ind2, "->", orderedUpdate[ind1], orderedUpdate[ind2])
-				// switch these two elements
-				tmp1 := orderedUpdate[ind1]
-				orderedUpdate[ind1] = orderedUpdate[ind2]
-				orderedUpdate[ind2] = tmp1
+			if ind1 != -1 && ind2 != -1 {
+				if ind1 > ind2 {
+					// fmt.Println("  broken rule:", rules[i], "switch:", ind1, ind2, "->", orderedUpdate[ind1], orderedUpdate[ind2])
+					
+					// switch these two elements
+					tmp1 := orderedUpdate[ind1]
+					orderedUpdate[ind1] = orderedUpdate[ind2]
+					orderedUpdate[ind2] = tmp1
+					// fmt.Println("\t", orderedUpdate)
+				}
 			}
+		}
+
+		if isUpdateCorrect(orderedUpdate, rules) {
+			// fmt.Println("  update is correctly ordered")
+			break
+		}
+
+		if k == maxIter-1 {
+			fmt.Println("Max iteration reached:", maxIter)
 		}
 	}
 
@@ -223,6 +237,7 @@ func orderAnUpdate(update []int, rules [][]int) []int {
 
 func solve2(rules [][]int, updates [][]int, printout bool) int {
 
+	maxIter := 10
 	sum := 0
 	for i := range updates {
 		// fmt.Println("yay:", data[i])
@@ -231,20 +246,15 @@ func solve2(rules [][]int, updates [][]int, printout bool) int {
 
 		if isCorrect == false {
 
-			orderedUpdate := orderAnUpdate(updates[i], rules)
+			orderedUpdate := orderAnUpdate(updates[i], rules, maxIter)
+
+			middleInd := len(orderedUpdate) / 2			// this should be int floor
+			sum = sum + orderedUpdate[middleInd]
 
 			if printout {
 				fmt.Println(i, updates[i], "=>", orderedUpdate)
+				fmt.Println("\t", middleInd, len(orderedUpdate), "->", orderedUpdate[middleInd])
 			}
-			// break
-
-			// middleInd := len(updates[i]) / 2	// this should be int floor
-
-			// if printout {
-			// 	fmt.Println("\t", middleInd, len(updates[i]), "->", updates[i][middleInd])
-			// }
-
-			// sum = sum + updates[i][middleInd]
 		}
 	}
 
@@ -270,13 +280,13 @@ func main() {
 	fmt.Println("Solution part 1 =", sol1)
 
 	// ---------------------------------------------
-	// fmt.Println()
-	// fmt.Println("=== Part 2 ===")
-	// sol2_test := solve2(testRules, testUpdates, true)
-	// fmt.Println("Test solution 2 =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
+	fmt.Println()
+	fmt.Println("=== Part 2 ===")
+	sol2_test := solve2(testRules, testUpdates, true)
+	fmt.Println("Test solution 2 =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
 
-	// sol2 := solve2(fileData, "MAS", false)
-	// fmt.Println("Solution part 2 =", sol2)
+	sol2 := solve2(rules, updates, false)
+	fmt.Println("Solution part 2 =", sol2)
 
 	// fmt.Println("yolo", 4/2, 3/2)
 }
