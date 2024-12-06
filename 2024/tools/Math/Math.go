@@ -42,3 +42,19 @@ func StringToInt(str string) int {
 		panic(err)
 	}
 }
+
+func MatrixDotVector(matrix [][]int, vector []int) []float32 {
+
+	result := []float32 {}
+
+	for i := range matrix {
+
+		line := float32(0)
+		for j := range vector {
+			line = line + float32(matrix[i][j]) * float32(vector[j])
+		}
+		result = append(result, line)
+	}
+
+	return result
+}
