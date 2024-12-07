@@ -4,6 +4,8 @@ import (
 	"strconv"
 )
 
+var Rotate90CwMatrix = [][]int {{0,1}, {-1,0}}
+
 // Functions with names starting with upper case are exported
 
 func AbsInt(a int) int {

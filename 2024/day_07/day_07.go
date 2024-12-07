@@ -4,7 +4,7 @@ import (
 	// Array "aoc_2024/tools/Array"
 	// Math "aoc_2024/tools/Math"
 	rw "aoc_2024/tools/rw"
-	// "time"
+	"time"
 	// Printer "aoc_2024/tools/Printer"
 	"fmt"
 	"strconv"
@@ -24,18 +24,19 @@ var testData1 = []string {
 	"292: 11 6 16 20",
 }
 
-var testSolution1, testSolution2 = 3749, -1
-var rotate90CwMatrix = [][]int {{0,1}, {-1,0}}
+var testSolution1, testSolution2 = 3749, 11387
 
 //------------------------------------------------------
 
 func checkSolution(testValue int, solValue int) string {
 	if testValue == solValue {
-		return "passed"
+		return "passed   :)"
 	} else {
-		return "failed"
+		return "failed   :("
 	}
 }
+
+//------------------------------------------------------
 
 func initData(fileLines []string) ([][] int) {
 
@@ -75,19 +76,26 @@ func initData(fileLines []string) ([][] int) {
 
 }
 
-func doOperation(operator rune, value1 int, value2 int) int {
-	if operator == '+' {
+func doOperation(operator string, value1 int, value2 int) int {
+
+	if operator == "+" {
 		return value1 + value2
-	} else if operator == '*' {
+	} else if operator == "*" {
 		return value1 * value2
-	} else {
-		return -1
+	} else if operator == "||" {
+		conc := strconv.Itoa(value1) + strconv.Itoa(value2)
+		_int, err := strconv.Atoi(conc)
+		if err == nil {
+			return _int
+		} else {
+			panic(err)
+		}
 	}
+
+	return -1
 }
 
-func checkIfSolvable(target int, numbers []int, result int) bool {
-
-	operators := []rune {'+', '*'}
+func checkIfSolvable(target int, numbers []int, operators []string, result int) bool {
 
 	for i := range operators {
 		if result == -1 {
@@ -96,7 +104,7 @@ func checkIfSolvable(target int, numbers []int, result int) bool {
 			
 			// either call next recursion or end it
 			if len(numbers) > 2 {
-				if checkIfSolvable(target, numbers[2:], _result) {
+				if checkIfSolvable(target, numbers[2:], operators, _result) {
 					return true
 				} else {
 					continue
@@ -117,7 +125,7 @@ func checkIfSolvable(target int, numbers []int, result int) bool {
 
 			// either call next recursion or end it
 			if len(numbers) > 1 {
-				if checkIfSolvable(target, numbers[1:], _result) {
+				if checkIfSolvable(target, numbers[1:], operators, _result) {
 					return true
 				} else {
 					// this operator resulted in false solvability - try next one
@@ -139,12 +147,14 @@ func checkIfSolvable(target int, numbers []int, result int) bool {
 
 func solve1(data [][]int, printout bool) int {
 
+	operators := []string {"+", "*"}
+
 	sum := 0
 	for i := range data {
 
 		target := data[i][0]
 		numbers := data[i][1:]
-		isSolvable := checkIfSolvable(target, numbers, -1)
+		isSolvable := checkIfSolvable(target, numbers, operators, -1)
 
 		if printout {
 			fmt.Println(i, data[i], "=>", isSolvable)
@@ -160,12 +170,23 @@ func solve1(data [][]int, printout bool) int {
 
 //----------------------------------------
 
-func solve2(data [][]rune, startingInd []int, maxSteps int, printout bool) int {
+func solve2(data [][]int, printout bool) int {
+
+	operators := []string {"+", "*", "||"}
 
 	sum := 0
 	for i := range data {
-		for j := range data[i] {
-			sum = sum + j
+
+		target := data[i][0]
+		numbers := data[i][1:]
+		isSolvable := checkIfSolvable(target, numbers, operators, -1)
+
+		if printout {
+			fmt.Println(i, data[i], "=>", isSolvable)
+		}
+
+		if isSolvable {
+			sum = sum + target
 		}
 	}
 
@@ -190,13 +211,16 @@ func main() {
 	fmt.Println("Solution part 1 =", sol1)
 
 	// ---------------------------------------------
-	// fmt.Println()
-	// fmt.Println("=== Part 2 ===")
-	// sol2_test := solve2(dataTest, startingIndTest, 9999, true)
-	// fmt.Println("Test solution 2 =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
+	fmt.Println()
+	fmt.Println("=== Part 2 ===")
+	sol2_test := solve2(dataTest, true)
+	fmt.Println("Test solution 2 =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
 
-	// t1 := time.Now()
-	// sol2 := solve2(data, startingInd, 99999999, false)
-	// dur := time.Since(t1)
-	// fmt.Println("Solution part 2 =", sol2, "(Et =", dur, ")")
+	t1 := time.Now()
+	sol2 := solve2(data, false)
+	dur := time.Since(t1)
+	fmt.Println("Solution part 2 =", sol2, "(Et =", dur, ")")
+
+	lol := doOperation("||", 12, 567)
+	fmt.Println("yay", lol)
 }
