@@ -12,7 +12,7 @@ func PrintGridRune(grid [][]rune){
 
 	for i := range grid {
 		for j:= range grid[i] {
-			fmt.Printf("%c", grid[i][j])
+			fmt.Printf("%c ", grid[i][j])
 		}
 		fmt.Printf("\n")
 	}
@@ -22,7 +22,7 @@ func PrintGridInt(grid [][]int){
 
 	for i := range grid {
 		for j:= range grid[i] {
-			fmt.Printf("%d", grid[i][j])
+			fmt.Printf("%d ", grid[i][j])
 		}
 		fmt.Printf("\n")
 	}
