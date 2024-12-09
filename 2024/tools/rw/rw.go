@@ -16,7 +16,7 @@ func ReadFile(fileName string) []string {
 	f, err := os.Open(fileName)
 
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 
 	// Read line by line
