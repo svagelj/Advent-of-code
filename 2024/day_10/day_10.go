@@ -5,7 +5,7 @@ import (
 	"sort"
 	// Math "aoc_2024/tools/Math"
 	rw "aoc_2024/tools/rw"
-	// "time"
+	"time"
 	Printer "aoc_2024/tools/Printer"
 	"fmt"
 	"strconv"
@@ -91,8 +91,12 @@ func doOneTrail(data [][]int, start [2]int, printout bool) [][]int {
 	paths[0] = [][2]int {{start[0], start[1]}}
 	nextID := 1
 
+	// approach or implementation of visited matrix doesn't work
+	// some cases are being incorrectly deleted
+	// so this should be deleted as it is not used
 	visited := Array.InitArrayValuesInt(M,N, 0)
 	visited[start[0]][start[1]] = 1
+
 	peaks := Array.InitArrayValuesInt(M,N, 0)
 
 	maxSteps := 9999999
@@ -300,9 +304,35 @@ func solve1(data [][]int, starts [][2]int, printout bool) int {
 
 //----------------------------------------
 
-func solve2(data []int, printout bool) int {
+func solve2(data [][]int, starts [][2]int, printout bool) int {
+
+	if printout {
+		Printer.PrintGridInt(data)
+	}
 
 	sum := 0
+	for k := range starts {
+		// break
+
+		peaks := doOneTrail(data, starts[k], false)
+
+		// Count the number of peaks reached
+		n := 0
+		for i := range peaks {
+			for j := range peaks[i] {
+				if peaks[i][j] != 0 {
+					n = n + peaks[i][j]
+				}
+			}
+		}
+		sum = sum + n
+
+		if printout || false {
+			fmt.Println("start from:", starts[k], "=>", n)
+			// Printer.PrintGridInt(peaks)
+		}
+
+	}
 	
 	return sum
 }
@@ -325,13 +355,13 @@ func main() {
 	fmt.Println("Solution part 1 =", sol1)
 
 	// ---------------------------------------------
-	// fmt.Println()
-	// fmt.Println("=== Part 2 ===")
-	// sol2_test := solve2(dataTest, true)
-	// fmt.Println("Test solution 2 =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
+	fmt.Println()
+	fmt.Println("=== Part 2 ===")
+	sol2_test := solve2(dataTest, startsTest, true)
+	fmt.Println("Test solution 2 =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
 
-	// t1 := time.Now()
-	// sol2 := solve2(data, false)
-	// dur := time.Since(t1)
-	// fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
+	t1 := time.Now()
+	sol2 := solve2(data, starts, false)
+	dur := time.Since(t1)
+	fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
 }
