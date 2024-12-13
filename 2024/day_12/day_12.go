@@ -14,19 +14,19 @@ import (
 )
 
 // var must be used for global variables
-// var testData0 = []string {
-// 	"AAAA",
-// 	"BBCD",
-// 	"BBCC",
-// 	"EEEC",
-// }
 var testData0 = []string {
-	"OOOOO",
-	"OXOXO",
-	"OOOOO",
-	"OXOXO",
-	"OOOOO",
+	"AAAA",
+	"BBCD",
+	"BBCC",
+	"EEEC",
 }
+// var testData0 = []string {
+// 	"OOOOO",
+// 	"OXOXO",
+// 	"OOOOO",
+// 	"OXOXO",
+// 	"OOOOO",
+// }
 var testData1 = []string {
 	"RRRRIICCFF",
 	"RRRRIICCCF",
@@ -40,7 +40,7 @@ var testData1 = []string {
 	"MMMISSJEEE",
 }
 
-var testSolution1, testSolution2 = 1930, -1
+var testSolution1, testSolution2 = 1930, 1206
 
 //------------------------------------------------------
 
@@ -67,35 +67,6 @@ func initData(fileLines []string) [][]rune {
 	return data
 }
 
-func floodFill(data [][]rune, plant rune, i int, j int, nodes [][2]int) [][2]int {
-
-	curLoc := [2]int {i,j}
-	fmt.Println("curr", curLoc)
-	fmt.Println("   ", nodes)
-
-	if data[i][j] != plant || slices.Contains(nodes, curLoc) {
-		return nodes
-	}
-
-	nodes = append(nodes, curLoc)
-
-	if j+1 < len(data[i]) && !slices.Contains(nodes, [2]int{i,j+1}) {
-		floodFill(data, data[i][j+1], i,j+1, nodes)
-	}
-	if j > 0 && !slices.Contains(nodes, [2]int{i,j-1}) {
-		floodFill(data, data[i][j-1], i,j-1, nodes)
-	}
-
-	if i+1 < len(data) && !slices.Contains(nodes, [2]int{i+1,j}) {
-		floodFill(data, data[i+1][j], i+1,j, nodes)
-	}
-	if i > 0 && !slices.Contains(nodes, [2]int{i-1,}) {
-		floodFill(data, data[i-1][j], i-1,j, nodes)
-	}
-
-	return nodes
-}
-
 func floodFillQ(data [][]rune, plant rune, i int, j int) [][2]int {
 
 	nodes := [][2] int {}
@@ -114,28 +85,22 @@ func floodFillQ(data [][]rune, plant rune, i int, j int) [][2]int {
 
 		if x+1 < len(data[0]) && data[y][x+1] == plant && visited[y][x+1] == 0 && !slices.Contains(queue, [2]int {y,x+1}) {
 			queue = append(queue, [2]int{y,x+1})
-			// fmt.Println("   x+1", string(data[y][x+1]), string(plant), data[y][x+1] == plant, [2]int{y,x+1})
 		}
 		if x > 0 && data[y][x-1] == plant && visited[y][x-1] == 0 && !slices.Contains(queue, [2]int {y,x-1}) {
 			queue = append(queue, [2]int{y,x-1})
-			// fmt.Println("   x-1", string(data[y][x-1]), string(plant), data[y][x-1] == plant, [2]int{y,x-1})
 		}
 
 		if y+1 < len(data) && data[y+1][x] == plant && visited[y+1][x] == 0 && !slices.Contains(queue, [2]int {y+1,x}) {
 			queue = append(queue, [2]int{y+1,x})
-			// fmt.Println("   y+1", string(data[y+1][x]), string(plant), data[y+1][x] == plant, [2]int{y+1,x})
 		}
 		if y > 0 && data[y-1][x] == plant && visited[y-1][x] == 0 && !slices.Contains(queue, [2]int {y-1,x}) {
 			queue = append(queue, [2]int{y-1,x})
-			// fmt.Println("   y-1", string(data[y-1][x]), string(plant), data[y-1][x] == plant, [2]int{y-1,x})
 		}
 
 		if len(queue) == 0 {
 			break
 		}
 		k++
-
-		// fmt.Println("\t", k, len(queue), y,x, string(data[y][x]), string(plant), i,j)
 	}
 
 	return nodes
@@ -177,13 +142,10 @@ func makeRegions(data [][]rune) map[string][][2]int {
 
 	for i := range data {
 		for j := range data[i] {
-			// fmt.Println("current", i,j, string(data[i][j]))		
 			if visited[i][j] == 0 {
 				// we are in new region -> flood fill
 				plant := data[i][j]
-				// fmt.Println("   flood")
 				region := floodFillQ(data, plant, i,j)
-				// fmt.Println("   flood done")
 
 				for k := range len(region) {
 					n,m := region[k][0], region[k][1]
@@ -194,8 +156,6 @@ func makeRegions(data [][]rune) map[string][][2]int {
 				regions[newRegionName] = region
 			}
 		}
-
-		// fmt.Println("i", i, "/", len(data))
 	}
 
 	return regions
@@ -248,7 +208,6 @@ func solve1(data [][]rune, printout bool) int {
 		// fmt.Println("  ", i, "/", len(regions))
 		for k := range len(region) {
 			i,j := region[k][0], region[k][1]
-			// fmt.Println("curr", rName, i,j, region)
 			
 			// area
 			_, found := area[rName]
@@ -288,10 +247,203 @@ func solve1(data [][]rune, printout bool) int {
 
 //----------------------------------------
 
-func solve2(data []int, maxBlinks int, printout bool) int {
+func getRegionSides(data [][]rune, region [][2]int) int {
 
-	fmt.Println(0, "=>", len(data))
-	sum := 1
+	plant := data[region[0][0]][region[0][1]]
+	M,N := len(data), len(data[0])
+	visitedAbove := [][2]int {}
+	visitedBellow := [][2]int {}
+	visitedRight := [][2]int {}
+	visitedLeft := [][2]int {}
+	sides := 0
+
+	for k :=  range region {
+		y,x := region[k][0], region[k][1]
+
+		// above
+		if !slices.Contains(visitedAbove, [2]int{y,x}) && (y == 0 || data[y-1][x] != plant) {
+			sides++
+			leftStop, rightStop := false, false
+			// go right and left for all points applicable
+			for i := range N {
+				// look right
+				if x+i == N {
+					rightStop = true
+				}
+				if !rightStop && data[y][x+i] == plant && (y == 0 || data[y-1][x+i] != data[y][x+i]) {
+					if !slices.Contains(visitedAbove, [2]int{y,x+i}) {
+						visitedAbove = append(visitedAbove, [2]int {y,x+i})
+					}
+				} else {
+					rightStop = true
+				}
+
+				// look left
+				if x-i < 0 {
+					leftStop = true
+				}
+				if !leftStop && data[y][x-i] == plant && (y == 0 || data[y-1][x-i] != data[y][x-i]) {
+					if !slices.Contains(visitedAbove, [2]int{y,x-i}) {
+						visitedAbove = append(visitedAbove, [2]int {y,x-i})
+					}
+				} else {
+					leftStop = true
+				}
+
+				if rightStop && leftStop {
+					break
+				}
+			}
+		}
+
+		// bellow
+		if !slices.Contains(visitedBellow, [2]int{y,x}) && (y == M-1 || data[y+1][x] != plant) {
+			sides++
+			leftStop, rightStop := false, false
+			// go right and left for all points applicable
+			for i := range M {
+				// look right
+				if x + i == N {
+					rightStop = true
+				}
+				if !rightStop && data[y][x+i] == plant && (y == M-1 || data[y+1][x+i] != data[y][x+i]) {
+					if !slices.Contains(visitedBellow, [2]int{y,x+i}) {
+						visitedBellow = append(visitedBellow, [2]int {y,x+i})
+					}
+				} else {
+					rightStop = true
+				}
+
+				// look left
+				if x - i < 0 {
+					leftStop = true
+				}
+				if !leftStop && data[y][x-i] == plant && (y == M-1 || data[y+1][x-i] != data[y][x-i]) {
+					if !slices.Contains(visitedBellow, [2]int{y,x-i}) {
+						visitedBellow = append(visitedBellow, [2]int {y,x-i})
+					}
+				} else {
+					leftStop = true
+				}
+
+				if rightStop && leftStop {
+					break
+				}
+			}
+		}
+
+		// right side
+		if !slices.Contains(visitedRight, [2]int{y,x}) && (x == M-1 || data[y][x+1] != plant) {
+			sides++
+			upStop, downStop := false, false
+			// go up and down for all points applicable
+			for i := range N {
+				// look down
+				if y+i == M {
+					downStop = true
+				}
+				if !downStop && data[y+i][x] == plant && (x == M-1 || data[y+i][x+1] != data[y+i][x]) {
+					if !slices.Contains(visitedRight, [2]int{y+i,x}) {
+						visitedRight = append(visitedRight, [2]int {y+i,x})
+					}
+				} else {
+					downStop = true
+				}
+
+				// look up
+				if y-i < 0 {
+					upStop = true
+				}
+				if !upStop && data[y-i][x] == plant && (x == M-1 || data[y-i][x+1] != data[y-i][x]) {
+					if !slices.Contains(visitedRight, [2]int{y-i,x}) {
+						visitedRight = append(visitedRight, [2]int {y-i,x})
+					}
+				} else {
+					upStop = true
+				}
+
+				if upStop && downStop {
+					break
+				}
+			}
+		}
+
+		// left side
+		if !slices.Contains(visitedLeft, [2]int{y,x}) && (x == 0 || data[y][x-1] != plant) {
+			sides++
+			upStop, downStop := false, false
+			// go up and down for all points applicable
+			for i := range N {
+				// look down
+				if y+i == M {
+					downStop = true
+				}
+				if !downStop && data[y+i][x] == plant && (x == 0 || data[y+i][x-1] != data[y+i][x]) {
+					if !slices.Contains(visitedLeft, [2]int{y+i,x}) {
+						visitedLeft = append(visitedLeft, [2]int {y+i,x})
+					}
+				} else {
+					downStop = true
+				}
+
+				// look up
+				if y-i < 0 {
+					upStop = true
+				}
+				if !upStop && data[y-i][x] == plant && (x == 0 || data[y-i][x-1] != data[y-i][x]) {
+					if !slices.Contains(visitedLeft, [2]int{y-i,x}) {
+						visitedLeft = append(visitedLeft, [2]int {y-i,x})
+					}
+				} else {
+					upStop = true
+				}
+
+				if upStop && downStop {
+					break
+				}
+			}
+		}
+	}
+
+	return sides
+}
+
+func solve2(data [][]rune, printout bool) int {
+
+	if printout {
+		Printer.PrintGridRune(data)
+	}
+
+	area := make(map[string]int)
+	sides := make(map[string]int)
+	regions := makeRegions(data)
+
+	for rName, region := range regions {
+		// fmt.Println("  ", i, "/", len(regions))
+		for range len(region) {
+			// area
+			_, found := area[rName]
+			if !found {
+				area[rName] = 1
+			} else {
+				area[rName]++
+			}
+
+			sides[rName] = getRegionSides(data, regions[rName])
+		}
+	}
+
+	if printout {
+		for key := range area {
+			fmt.Printf("key %s: a=%d, p=%d => %d \n", key, area[key], sides[key], area[key]*sides[key])
+			// fmt.Println("   ", regions[key], len(regions[key]))
+		}
+	}
+
+	sum := 0
+	for key := range area {
+		sum = sum + area[key]*sides[key]
+	}
 	
 	return sum
 }
@@ -316,13 +468,13 @@ func main() {
 	fmt.Println("Solution part 1 =", sol1, "(ET =", dur, ")")
 
 	// ---------------------------------------------
-	// fmt.Println()
-	// fmt.Println("=== Part 2 ===")
-	// sol2_test := solve2(dataTest, 25, true)
-	// fmt.Println("Test solution 2 =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
+	fmt.Println()
+	fmt.Println("=== Part 2 ===")
+	sol2_test := solve2(dataTest, true)
+	fmt.Println("Test solution 2 =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
 
-	// t1 := time.Now()
-	// sol2 := solve2(data, 40, true)
-	// dur := time.Since(t1)
-	// fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
+	t1 = time.Now()
+	sol2 := solve2(data, false)
+	dur = time.Since(t1)
+	fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
 }
