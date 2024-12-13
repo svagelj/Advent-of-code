@@ -34,6 +34,20 @@ func InitArrayValuesInt(M int, N int, value int) [][] int {
 	return array
 }
 
+func InitArrayValuesRune(M int, N int, value rune) [][] rune {
+	array := [][]rune {}
+
+	for range M {
+		_line := []rune {}
+		for range N {
+			_line = append(_line, value)
+		}
+		array = append(array, _line)
+	}
+
+	return array
+}
+
 func InitArrayValuesInt4D(M int, N int) [][][][] int {
 	array := [][][][]int {}
 
