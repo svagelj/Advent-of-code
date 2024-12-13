@@ -27,3 +27,14 @@ func PrintGridInt(grid [][]int){
 		fmt.Printf("\n")
 	}
 }
+
+func PrintRegion(nodes [][2]int, M int, N int) {
+
+	area := Array.InitArrayValuesRune(M,N, '.')
+	for k := range nodes {
+		i,j := nodes[k][0], nodes[k][1]
+		area[i][j] = '#'
+	}
+	Printer.PrintGridRune(area)
+
+}
