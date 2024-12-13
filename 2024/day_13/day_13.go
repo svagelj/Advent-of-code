@@ -46,7 +46,7 @@ func checkSolution(testValue int, solValue int) string {
 
 //------------------------------------------------------
 
-func initData(fileLines []string) [][][2]int {
+func initData(fileLines []string, addPrizeValue int) [][][2]int {
 
 	data := [][][2]int {}
 
@@ -74,8 +74,12 @@ func initData(fileLines []string) [][][2]int {
 			if err != nil {
 				panic(err)
 			}
-
-			machineData = append(machineData, [2]int{xValue, yValue})
+			
+			if !strings.Contains(line, "Button") {
+				machineData = append(machineData, [2]int{xValue+addPrizeValue, yValue+addPrizeValue})
+			} else {
+				machineData = append(machineData, [2]int{xValue, yValue})
+			}
 		}
 	}
 
@@ -85,7 +89,7 @@ func initData(fileLines []string) [][][2]int {
 }
 
 
-func solveOneGameByHand(gameData [][2]int, costA int, costB int, maxButtonPress int) float32 {
+func solveOneGameByHand(gameData [][2]int, costA int, costB int, maxButtonPress int) float64 {
 
 	Ax, Ay := gameData[0][0], gameData[0][1]
 	Bx, By := gameData[1][0], gameData[1][1]
@@ -107,29 +111,34 @@ func solveOneGameByHand(gameData [][2]int, costA int, costB int, maxButtonPress 
 		ax, bx := By, -Bx
 		ay, by := -Ay, Ax
 
-		Na := float32(ax*Px + bx*Py) / float32(d)
-		Nb := float32(ay*Px + by*Py) / float32(d)
+		Na := float64(ax*Px + bx*Py) / float64(d)
+		Nb := float64(ay*Px + by*Py) / float64(d)
 
-		if float32(int(Na)) - Na != 0 || float32(int(Nb)) - Nb != 0 {
+		if float64(int(Na)) - Na != 0 || float64(int(Nb)) - Nb != 0 {
 			// fmt.Println("Number of presses is not int")
 			return 0
 		}
 
-		if Na > float32(maxButtonPress) || Nb > float32(maxButtonPress) {
+		if Na < 0 || Nb < 0 {
+			// fmt.Println("Button press is negative")
+			return 0
+		}
+
+		if maxButtonPress > 0 && (Na > float64(maxButtonPress) || Nb > float64(maxButtonPress)) {
 			// fmt.Println("Button press over", maxButtonPress, "times")
 			return 0
 		}
 
-		return float32(costA)*Na + float32(costB)*Nb
+		return float64(costA)*Na + float64(costB)*Nb
 	}
 }
 
-func solve1(data [][][2]int, printout bool) float32 {
+func solve1(data [][][2]int, printout bool) float64 {
 
 	costA, costB := 3,1
 	maxButtonPress := 100
 
-	sum := float32(0)
+	sum := 0.0
 	for k := range data {
 		tokens := solveOneGameByHand(data[k], costA, costB, maxButtonPress)
 
@@ -144,25 +153,34 @@ func solve1(data [][][2]int, printout bool) float32 {
 
 //----------------------------------------
 
-func solve2(data [][]rune, printout bool) int {
+func solve2(data [][][2]int, printout bool) float64 {
 
-	if printout {
-		// Printer.PrintGridRune(data)
+	costA, costB := 3,1
+	maxButtonPress := -1
+
+	sum := 0.0
+	for k := range data {
+		tokens := solveOneGameByHand(data[k], costA, costB, maxButtonPress)
+
+		if printout {
+			fmt.Println(k+1, "=>", tokens, "| integer:", int(tokens))
+		}
+		sum = sum + tokens
 	}
-
-	sum := 0
-
+	
 	return sum
 }
 
 func main() {
 
 	// data gathering and parsing
-	dataTest := initData(testData1)
+	dataTest := initData(testData1, 0)
+	dataTest2 := initData(testData1, 10000000000000)
 
 	fileName := "day_13_data.txt"
 	fileData := rw.ReadFile(fileName)
-	data := initData(fileData)
+	data := initData(fileData, 0)
+	data2 := initData(fileData, 10000000000000)
 
 	// ---------------------------------------------
 	fmt.Println("=== Part 1 ===")
@@ -175,13 +193,14 @@ func main() {
 	fmt.Println("Solution part 1 =", sol1, "(ET =", dur, ")")
 
 	// ---------------------------------------------
-	// fmt.Println()
-	// fmt.Println("=== Part 2 ===")
-	// sol2_test := solve2(dataTest, true)
-	// fmt.Println("Test solution 2 =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
+	fmt.Println()
+	fmt.Println("=== Part 2 ===")
+	sol2_test := solve2(dataTest2, true)
+	fmt.Println("Test solution 2 =", sol2_test, "->", checkSolution(int(sol2_test), testSolution2))
 
-	// t1 = time.Now()
-	// sol2 := solve2(data, false)
-	// dur = time.Since(t1)
-	// fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")"))
+	t1 = time.Now()
+	sol2 := solve2(data2, false)
+	dur = time.Since(t1)
+	fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
+	fmt.Printf("integer: %d", int(sol2))
 }
