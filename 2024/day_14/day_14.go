@@ -3,9 +3,11 @@ package main
 import (
 	Array "aoc_2024/tools/Array"
 	"strings"
+
 	// Math "aoc_2024/tools/Math"
 	rw "aoc_2024/tools/rw"
 	"time"
+
 	// Printer "aoc_2024/tools/Printer"
 	"fmt"
 	"strconv"
@@ -39,11 +41,21 @@ func checkSolution(testValue int, solValue int) string {
 	}
 }
 
-func PrintGridInt(grid [][]int){
+func PrintGridInt(grid [][]int, spaceStr string){
 
 	for i := range grid {
 		for j:= range grid[i] {
-			fmt.Printf("%d ", grid[i][j])
+			fmt.Printf("%d%s", grid[i][j], spaceStr)
+		}
+		fmt.Printf("\n")
+	}
+}
+
+func PrintGridRune(grid [][]rune, spaceStr string){
+
+	for i := range grid {
+		for j:= range grid[i] {
+			fmt.Printf("%c%s", grid[i][j], spaceStr)
 		}
 		fmt.Printf("\n")
 	}
@@ -85,7 +97,7 @@ func simulateOneRobot(robotData [4]int, Nx int, Ny int, nSteps int) (int, int) {
 		x1 int
 		y1 int
 	)
-	
+
 	if vx >= 0 {
 		x1 = (x0 + vx*nSteps) % Nx
 	} else {
@@ -147,11 +159,38 @@ func solve1(data [][4]int, Nx int, Ny int, nSteps int, printout bool) int {
 
 //----------------------------------------
 
-func solve2(data [][][2]int, printout bool) int {
+func solve2(data [][4]int, Nx int, Ny int, nSteps int, printout bool) int {
 
-	sum := 0
+	xHalf, yHalf := Nx / 2, Ny / 2
+	fmt.Println(Nx, xHalf)
+	fmt.Println(Ny, yHalf)
+
+	treeStr := "###############################"
+
+	for n := range nSteps {
+
+		visitedInt := Array.InitArrayValuesInt(Ny,Nx, 0)
+		visitedRune := Array.InitArrayValuesRune(Ny,Nx, '.')
+		for k :=  range data {
+			x, y := simulateOneRobot(data[k], Nx, Ny, n)
+			visitedInt[y][x]++
+			visitedRune[y][x] = '#'
+		}
+
+		for i := range visitedRune {
+			_str := string(visitedRune[i])
+			if strings.Contains(_str, treeStr){
+				fmt.Println("\n-----------------------------------------------")
+				fmt.Println("n steps =", n)
+				PrintGridRune(visitedRune, "")
+				fmt.Println("n steps =", n)
+
+				return 0
+			}
+		}
+	}
 	
-	return sum
+	return 0
 }
 
 func main() {
@@ -179,11 +218,11 @@ func main() {
 	// ---------------------------------------------
 	// fmt.Println()
 	// fmt.Println("=== Part 2 ===")
-	// sol2_test := solve2(dataTest2, true)
+	// sol2_test := solve2(dataTest, NxTest,NyTest, nSteps, true)
 	// fmt.Println("Test solution 2 =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
 
-	// t1 = time.Now()
-	// sol2 := solve2(data2, false)
-	// dur = time.Since(t1)
-	// fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
+	t1 = time.Now()
+	sol2 := solve2(data, Nx, Ny, 10000, false)
+	dur = time.Since(t1)
+	fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
 }
