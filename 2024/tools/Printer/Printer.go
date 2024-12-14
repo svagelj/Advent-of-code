@@ -1,9 +1,7 @@
 package tools
 
 import (
-	// "bufio"
 	"fmt"
-	// "os"
 )
 
 // Functions with names starting with upper case are exported
