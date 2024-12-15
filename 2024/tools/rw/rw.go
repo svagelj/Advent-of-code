@@ -106,14 +106,3 @@ func WriteFileSlice(fileName string, mode rune, content []string) {
 		panic(err)
 	}
 }
-
-func ReverseString(inputStr string) string {
-
-	reversed := ""
-
-	for i := len(inputStr) - 1; i >= 0; i-- {
-		reversed += string(inputStr[i])
-	}
-
-	return reversed
-}

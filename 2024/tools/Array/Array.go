@@ -20,6 +20,17 @@ func GetIndexString(array string, element string) int {
 	return -1
 }
 
+func ReverseString(inputStr string) string {
+
+	reversed := ""
+
+	for i := len(inputStr) - 1; i >= 0; i-- {
+		reversed += string(inputStr[i])
+	}
+
+	return reversed
+}
+
 func InitArrayValuesInt(M int, N int, value int) [][] int {
 	array := [][]int {}
 
