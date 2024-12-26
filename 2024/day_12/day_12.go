@@ -113,7 +113,7 @@ func printRegion(nodes [][2]int, M int, N int) {
 		i,j := nodes[k][0], nodes[k][1]
 		area[i][j] = '#'
 	}
-	Printer.PrintGridRune(area)
+	Printer.PrintGridRune(area, 1)
 
 }
 
@@ -186,7 +186,7 @@ func getPlantPerimeter(data [][]rune, i int, j int, M int, N int) int {
 func solve1(data [][]rune, printout bool) int {
 
 	if printout {
-		Printer.PrintGridRune(data)
+		Printer.PrintGridRune(data, 1)
 	}
 
 	regions := makeRegions(data)
@@ -411,7 +411,7 @@ func getRegionSides(data [][]rune, region [][2]int) int {
 func solve2(data [][]rune, printout bool) int {
 
 	if printout {
-		Printer.PrintGridRune(data)
+		Printer.PrintGridRune(data, 1)
 	}
 
 	area := make(map[string]int)

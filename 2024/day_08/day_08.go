@@ -105,7 +105,7 @@ func addAntinodes1(antinodes map[[2]int]int, positions map[rune][][2]int, antenn
 func solve1(data [][]rune, positions map[rune][][2]int, printout bool) int {
 
 	if printout {
-		Printer.PrintGridRune(data)
+		Printer.PrintGridRune(data, 1)
 		for key, value := range positions {
 			fmt.Printf("%c: %d\n", key, value)
 		}
@@ -133,7 +133,7 @@ func solve1(data [][]rune, positions map[rune][][2]int, printout bool) int {
 			j := key[1]
 			disAntinodes[i][j] = value
 		}
-		Printer.PrintGridInt(disAntinodes)
+		Printer.PrintGridInt(disAntinodes, 1)
 	}
 
 	sum = len(antinodes)
@@ -183,7 +183,7 @@ func addAntinodes2(antinodes map[[2]int]int, positions map[rune][][2]int, antenn
 func solve2(data [][]rune, positions map[rune][][2]int, printout bool) int {
 
 	if printout {
-		Printer.PrintGridRune(data)
+		Printer.PrintGridRune(data, 1)
 		for key, value := range positions {
 			fmt.Printf("%c: %d\n", key, value)
 		}
@@ -211,7 +211,7 @@ func solve2(data [][]rune, positions map[rune][][2]int, printout bool) int {
 			j := key[1]
 			disAntinodes[i][j] = value
 		}
-		Printer.PrintGridInt(disAntinodes)
+		Printer.PrintGridInt(disAntinodes, 1)
 	}
 
 	sum = len(antinodes)

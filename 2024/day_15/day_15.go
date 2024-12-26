@@ -269,7 +269,7 @@ func makeOneMove1(data [][]rune, currPos [2]int, move rune) [2]int {
 func solve1(data [][]rune, moves string, start [2]int, printout bool) int {
 
 	if printout {
-		Printer.PrintGridRune(data, "")
+		Printer.PrintGridRune(data, 1)
 		// fmt.Println(moves)
 		fmt.Println(start)
 	}
@@ -290,7 +290,7 @@ func solve1(data [][]rune, moves string, start [2]int, printout bool) int {
 
 	if printout {
 		fmt.Println("\n---------")
-		Printer.PrintGridRune(dataCopy, "")
+		Printer.PrintGridRune(dataCopy, 1)
 	}
 
 	sum := 0
@@ -658,7 +658,7 @@ func solve2(data [][]rune, moves string, printout bool) int {
 	expanded, start := expandData(data)
 
 	if printout {
-		Printer.PrintGridRune(expanded, "")
+		Printer.PrintGridRune(expanded, 1)
 		fmt.Println(moves)
 		fmt.Println(start)
 	}
@@ -680,7 +680,7 @@ func solve2(data [][]rune, moves string, printout bool) int {
 
 	if printout {
 		fmt.Println("\n--------- dataCopy")
-		Printer.PrintGridRune(dataCopy, "")
+		Printer.PrintGridRune(dataCopy, 1)
 	}
 
 	sum := 0

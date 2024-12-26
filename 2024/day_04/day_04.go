@@ -3,6 +3,7 @@ package main
 import (
 	rw "aoc_2024/tools/rw"
 	Math "aoc_2024/tools/Math"
+	Array "aoc_2024/tools/Array"
 	"fmt"
 	"strings"
 )
@@ -35,7 +36,7 @@ func findTarget1(data []string, i int, j int, target string) int {
 
 	n := len(data)
 	m := len(data[i])
-	targetR := rw.ReverseString(target)
+	targetR := Array.ReverseString(target)
 	N := 0
 
 	// fmt.Println(i,j, target)
@@ -131,7 +132,7 @@ func findTarget2(data []string, i int, j int, target string) int {
 
 	n := len(data)
 	m := len(data[i])
-	targetR := rw.ReverseString(target)
+	targetR := Array.ReverseString(target)
 	maxJ := Math.MinInt(j+len(target), m)
 	maxI := Math.MinInt(i+len(target), n)
 	halfTarget:= len(target) / 2

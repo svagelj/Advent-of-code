@@ -268,7 +268,7 @@ func doOneTrail(data [][]int, start [2]int, printout bool) [][]int {
 func solve1(data [][]int, starts [][2]int, printout bool) int {
 
 	if printout {
-		Printer.PrintGridInt(data)
+		Printer.PrintGridInt(data, 1)
 	}
 
 	// i := 3
@@ -307,7 +307,7 @@ func solve1(data [][]int, starts [][2]int, printout bool) int {
 func solve2(data [][]int, starts [][2]int, printout bool) int {
 
 	if printout {
-		Printer.PrintGridInt(data)
+		Printer.PrintGridInt(data, 1)
 	}
 
 	sum := 0
