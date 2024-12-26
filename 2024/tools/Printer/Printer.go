@@ -7,32 +7,32 @@ import (
 
 // Functions with names starting with upper case are exported
 
-func PrintGridRune(grid [][]rune, space string){
+func PrintGridRune(grid [][]rune, pad int){
 
 	for i := range grid {
 		for j:= range grid[i] {
-			fmt.Printf("%c"+space, grid[i][j])
+			fmt.Printf("%*c", pad, grid[i][j])
 		}
 		fmt.Printf("\n")
 	}
 }
 
-func PrintGridInt(grid [][]int, space string){
+func PrintGridInt(grid [][]int, pad int){
 
 	for i := range grid {
 		for j:= range grid[i] {
-			fmt.Printf("%d"+space, grid[i][j])
+			fmt.Printf("%*d", pad, grid[i][j])
 		}
 		fmt.Printf("\n")
 	}
 }
 
-func PrintRegion(nodes [][2]int, M int, N int, space string) {
+func PrintRegion(nodes [][2]int, M int, N int, pad int) {
 
 	area := Array.InitArrayValuesRune(M,N, '.')
 	for k := range nodes {
 		i,j := nodes[k][0], nodes[k][1]
 		area[i][j] = '#'
 	}
-	PrintGridRune(area, space)
+	PrintGridRune(area, pad)
 }
