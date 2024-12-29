@@ -12,8 +12,8 @@ import (
 
 	Printer "aoc_2024/tools/Printer"
 	"fmt"
-	"strconv"
 	"sort"
+	"strconv"
 )
 
 // var must be used for global variables
@@ -45,7 +45,7 @@ var testData = []string {
 	"2,0",
 }
 
-var testSolution1, testSolution2 = 22, -1
+var testSolution1, testSolution2 = 22, "6,1"
 
 //------------------------------------------------------
 
@@ -128,7 +128,7 @@ func findShortestPath(maze [][]rune, startInd [2]int, endInd [2]int) int {
 	k := 0
 	for k = range 999999 {
 		if len(queue) == 0 {
-			fmt.Println("Empty queue!", k)
+			// fmt.Println("Empty queue!", k)
 			return -2
 		}
 
@@ -197,10 +197,43 @@ func solve1(data [][2]int, Nx int, Ny int, nSteps int, printout bool) int {
 
 //----------------------------------------
 
-func solve2(registers []int, program []int, printout bool) int {
+func solve2(data [][2]int, Nx int, Ny int, printout bool) string {
 
-	sum := 0
-	return sum
+	if printout {
+		fmt.Println(data)
+	}
+
+	maxSteps := len(data)
+	minSteps := 0
+	res := "_"
+	for range 9999 {
+
+		nSteps := (maxSteps + minSteps) / 2
+
+		maze := createMaze(data, Nx, Ny, nSteps)
+		if printout {
+			Printer.PrintGridRune(maze, 1)
+		}
+
+		startInd := [2]int {0,0}
+		endInd := [2]int {Ny-1,Nx-1}
+
+		price := findShortestPath(maze, startInd, endInd)
+		if price < 0 {
+			// this maze is not solvable
+			maxSteps = nSteps
+		} else {
+			minSteps = nSteps
+		}
+
+		// exit condition
+		if maxSteps - minSteps == 1 {
+			ind := minSteps
+			return strconv.Itoa(data[ind][0])+","+strconv.Itoa(data[ind][1])
+		}
+	}
+
+	return res
 }
 
 func main() {
@@ -223,13 +256,13 @@ func main() {
 	fmt.Println("Solution part 1 =", sol1, "(ET =", dur, ")")
 
 	// ---------------------------------------------
-	// fmt.Println()
-	// fmt.Println("=== Part 2 ===")
-	// sol2_1_test := solve2(registersTest2, programTest2, true)
-	// fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
+	fmt.Println()
+	fmt.Println("=== Part 2 ===")
+	sol2_1_test := solve2(dataTest, 7,7, false)
+	fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolutionStr(sol2_1_test, testSolution2))
 
-	// t1 = time.Now()
-	// sol2 := solve2(registers, program, false)
-	// dur = time.Since(t1)
-	// fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
+	t1 = time.Now()
+	sol2 := solve2(data, 71,71, false)
+	dur = time.Since(t1)
+	fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
 }
