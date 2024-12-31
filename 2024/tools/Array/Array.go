@@ -11,6 +11,21 @@ func GetIndexInt(array []int, element int) int {
 	return -1
 }
 
+func GetIndexInt2D(array [][]int, element []int) int {
+	for i := range array {
+		same := 0
+		for j := range element {
+			if array[i][j] == element[j] {
+				same++
+			}
+		}
+		if same == len(element) {
+			return i
+		}
+	}
+	return -1
+}
+
 func GetIndexString(array string, element string) int {
 	for i := range array {
 		if array[i] == element[0] {
