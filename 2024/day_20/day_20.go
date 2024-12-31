@@ -1,7 +1,7 @@
 package main
 
 import (
-	// Math "aoc_2024/tools/Math"
+	Math "aoc_2024/tools/Math"
 	Array "aoc_2024/tools/Array"
 	Printer "aoc_2024/tools/Printer"
 	rw "aoc_2024/tools/rw"
@@ -35,7 +35,7 @@ var testData = []string {
 	"###############",
 }
 
-var testSolution1, testSolution2 = 44, -1
+var testSolution1, testSolution2 = 44, 285
 
 //------------------------------------------------------
 
@@ -113,7 +113,7 @@ func getOriginalPath(data [][]rune, startInd [2]int, endInd [2]int) [][]int {
 	return path
 }
 
-func tryShortcut(data [][]rune, path [][]int, pointInd int, Ny int, Nx int) []int {
+func tryShortcut1(data [][]rune, path [][]int, pointInd int, Ny int, Nx int) []int {
 
 	queue := [][]int {}
 	y, x := path[pointInd][0], path[pointInd][1]
@@ -161,7 +161,7 @@ func solve1(data [][]rune, startInd [2]int, endInd [2]int, minShortcutLength int
 	sum := 0
 	for k := range path {
 		pathCopy := append([][]int {}, path...)
-		shortcutLengths := tryShortcut(dataCopy, pathCopy, k, Ny, Nx)
+		shortcutLengths := tryShortcut1(dataCopy, pathCopy, k, Ny, Nx)
 
 		for i := range shortcutLengths {
 			if shortcutLengths[i] >= minShortcutLength {
@@ -175,13 +175,61 @@ func solve1(data [][]rune, startInd [2]int, endInd [2]int, minShortcutLength int
 
 //----------------------------------------
 
-func solve2(data [][]rune, startInd []int, endInd []int, printout bool) int {
+func getPossibleLandingPoints(path [][]int, pointInd int, maxLength int, minShortcutLength int) map[[2]int]int {
+
+	// cheat is defined by jumping point on the path 
+	// and landing point on the path
+	// so go through the rest of the path and try to go there with Manhattan distance
+
+	landingPoints := make(map[[2]int]int)
+	y, x := path[pointInd][0], path[pointInd][1]
+
+	for k := pointInd + 2; k < len(path); k++ {
+		shortcutLength := Math.AbsInt(path[k][0] - y) + Math.AbsInt(path[k][1] - x)
+		normalPathLength := k - pointInd
+		skippedPath := normalPathLength - shortcutLength
+		if shortcutLength <= maxLength && shortcutLength < normalPathLength && skippedPath >= minShortcutLength {
+			landingPoints[[2]int {path[k][0], path[k][1]}] = skippedPath
+		}
+	}
+
+	return landingPoints
+}
+
+func tryShortcut2(path [][]int, pointInd int, minShortcutLength int) map[[4]int]int {
+
+	landingPoints := getPossibleLandingPoints(path, pointInd, 20, minShortcutLength)
+	y, x := path[pointInd][0], path[pointInd][1]
+
+	cheats := make(map[[4]int]int)
+
+	for k := range landingPoints {
+		key := [4]int {y,x,k[0], k[1]}
+		cheats[key] = landingPoints[k]
+	}
+
+	return cheats
+}
+
+func solve2(data [][]rune, startInd [2]int, endInd [2]int, minShortcutLength int, printout bool) int {
 
 	if printout {
+		Printer.PrintGridRune(data, 2)
 		fmt.Println("start:", startInd, "end:", endInd)
 	}
 
+	dataCopy := Array.CopyRune2D(data)
+	path := getOriginalPath(dataCopy, startInd, endInd)
+
+	// Try shortcut at every point of the path
 	sum := 0
+	for k := range path {
+		pathCopy := append([][]int {}, path...)
+		cheats := tryShortcut2(pathCopy, k, minShortcutLength)
+
+		sum = sum + len(cheats)
+	}
+
 	return sum
 }
 
@@ -205,13 +253,13 @@ func main() {
 	fmt.Println("Solution part 1 =", sol1, "(ET =", dur, ")")
 
 	// ---------------------------------------------
-	// fmt.Println()
-	// fmt.Println("=== Part 2 ===")
-	// sol2_1_test := solve2(towelsTest, patternsTest, true)		// 2, 1, 4, 6, 0, 1, 0
-	// fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
+	fmt.Println()
+	fmt.Println("=== Part 2 ===")
+	sol2_1_test := solve2(dataTest, startTets, endTest, 50, true)
+	fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
 
-	// t1 = time.Now()
-	// sol2 := solve2(towels, patterns, false)
-	// dur = time.Since(t1)
-	// fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
+	t1 = time.Now()
+	sol2 := solve2(data, start, end, 100, false)
+	dur = time.Since(t1)
+	fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
 }
