@@ -30,7 +30,7 @@ var testData = []string {
 	"bbrgwb",
 }
 
-var testSolution1, testSolution2 = 6, -1
+var testSolution1, testSolution2 = 6, 16
 
 //------------------------------------------------------
 
@@ -117,13 +117,71 @@ func solve1(towels []string, patterns []string, printout bool) int {
 
 //----------------------------------------
 
-func solve2(data [][2]int, Nx int, Ny int, printout bool) int {
+func countPossibleSolutions(towels []string, pattern string, nPossible int, cache map[string](int)) int {
+	// fmt.Println("Process pattern:", pattern)
 
-	if printout {
-		fmt.Println(data)
+	// reading from cache first
+	value, found := cache[pattern]
+	if found {
+		// fmt.Println("  read from cache:", pattern, value, nPossible)
+		nPossible = nPossible + value
+		return nPossible
 	}
 
+	_nPossible := 0	// local counter
+	for i := range towels {
+		t := towels[i]
+
+		// exit condition
+		if t == pattern {
+			nPossible++
+			return nPossible
+		}
+
+		if len(pattern) > len(t) && t == pattern[:len(t)] {
+			// current towel matches the beginning of the pattern
+			// call next iteration
+			_nPoss := countPossibleSolutions(towels, pattern[len(t):], 0, cache)
+			_nPossible = _nPossible + _nPoss
+			nPossible = nPossible + _nPoss
+		} 
+	}
+
+	// save to cache after all possible starting towels were processed
+	if len(pattern) > 1 {
+		_, found := cache[pattern]
+		if !found {
+			// fmt.Println("   create cache:", pattern, _nPossible)
+			cache[pattern] = _nPossible
+		} else {
+			// fmt.Println("\tfound!", cache[pattern], pattern)
+			panic("so sad")
+		}
+	}
+
+	return nPossible
+}
+
+func solve2(towels []string, patterns []string, printout bool) int {
+
+	if printout {
+		fmt.Println(towels)
+		fmt.Println(patterns)
+	}
+
+	cache := make(map[string](int))
+
 	sum := 0
+	for k := 0; k < len(patterns); k++ {
+		nPossible := countPossibleSolutions(towels, patterns[k], 0, cache) 
+
+		if printout {
+			fmt.Println(patterns[k], "->", nPossible)
+		}
+
+		sum = sum + nPossible
+	}
+
 	return sum
 }
 
@@ -147,13 +205,13 @@ func main() {
 	fmt.Println("Solution part 1 =", sol1, "(ET =", dur, ")")
 
 	// ---------------------------------------------
-	// fmt.Println()
-	// fmt.Println("=== Part 2 ===")
-	// sol2_1_test := solve2(dataTest, 7,7, false)
-	// fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolutionStr(sol2_1_test, testSolution2))
+	fmt.Println()
+	fmt.Println("=== Part 2 ===")
+	sol2_1_test := solve2(towelsTest, patternsTest, true)		// 2, 1, 4, 6, 0, 1, 0
+	fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
 
-	// t1 = time.Now()
-	// sol2 := solve2(data, 71,71, false)
-	// dur = time.Since(t1)
-	// fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
+	t1 = time.Now()
+	sol2 := solve2(towels, patterns, false)		// 397960320739899 is too low
+	dur = time.Since(t1)
+	fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
 }
