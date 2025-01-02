@@ -5,7 +5,7 @@ import (
 	// "sort"
 	// Math "aoc_2024/tools/Math"
 	rw "aoc_2024/tools/rw"
-	// "time"
+	"time"
 	// Printer "aoc_2024/tools/Printer"
 	"fmt"
 	"strconv"
@@ -114,9 +114,56 @@ func solve1(data []int, maxBlinks int, printout bool) int {
 
 func solve2(data []int, maxBlinks int, printout bool) int {
 
-	fmt.Println(0, "=>", len(data))
-	sum := solve1(data, maxBlinks, printout)
+	// State for this part is defined differently 
+	// state is a map[stoneNumber]: numberOfStones and iterate of this state (stoneNumbers)
+	// This way we process just stone numbers that are different from each other
+	// and prevent processing same stone numbers multiple times at one state change
+	state := make(map[int](int))
+	for i := range data {
+		_, found := state[data[i]]
+		if !found {
+			state[data[i]] = 1
+		} else {
+			state[data[i]]++
+		}
+	}
+
+	if printout {
+		fmt.Println("starting state:", state)
+	}
+
+	for i := range maxBlinks {
+
+		newState := make(map[int](int))
+		for key, N := range state {
+			newStones := changeStone1(key)
+
+			// append transformed stones with frequencies to newState
+			for j := range newStones {
+				newStone := newStones[j]
+				_, found := newState[newStone]
+				if !found {
+					newState[newStone] = N
+				} else {
+					newState[newStone] = newState[newStone] + N
+				}
+			}
+		}
+		if printout {
+			_sum := 0
+			for _, value := range newState {
+				_sum = _sum + value
+			}
+			fmt.Println(i+1, "=>", _sum)
+		}
+
+		state = newState
+	}
 	
+	sum := 0
+	for _, value := range state {
+		sum = sum + value
+	}
 	return sum
 }
 
@@ -138,13 +185,13 @@ func main() {
 	fmt.Println("Solution part 1 =", sol1)
 
 	// ---------------------------------------------
-	// fmt.Println()
-	// fmt.Println("=== Part 2 ===")
-	// sol2_test := solve2(dataTest, 25, true)
-	// fmt.Println("Test solution 2 =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
+	fmt.Println()
+	fmt.Println("=== Part 2 ===")
+	sol2_test := solve2(dataTest, 25, false)
+	fmt.Println("Test solution 2 =", sol2_test, "->", checkSolution(sol2_test, testSolution2))
 
-	// t1 := time.Now()
-	// sol2 := solve2(data, 40, true)
-	// dur := time.Since(t1)
-	// fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
+	t1 := time.Now()
+	sol2 := solve2(data, 75, false)
+	dur := time.Since(t1)
+	fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
 }
