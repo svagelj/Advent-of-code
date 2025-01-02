@@ -53,7 +53,7 @@ var testData = []string {
 }
 
 
-var testSolution1, testSolution2 = 7, -1
+var testSolution1, testSolution2 = 7, "co,de,ka,ta"
 
 //------------------------------------------------------
 
@@ -161,14 +161,67 @@ func solve1(data [][]string, printout bool) int {
 
 //----------------------------------------
 
-func solve2(data []int, nSteps int, printout bool) int {
+func solve2(data [][]string, printout bool) string {
 
 	if printout {
 		fmt.Println("data:", data)
 	}
 
-	sum := 0
-	return sum
+	// making connection for each node
+	connections := createConnectionsMap(data)
+	keys := []string {}
+	for key := range connections {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	if printout {
+		for k := range keys {
+			conn := connections[keys[k]]
+			sort.Strings(conn)
+			fmt.Println(keys[k], "->", conn)
+		}
+		fmt.Println()
+	}
+
+	nLargest := 0
+	bestList := []string {}
+
+	for i := range keys {
+		key := keys[i]
+		value := connections[key]
+
+		cycle := []string {key}
+		// for each first node check it's connections if they are connected to each other
+		for j := range value {
+			if slices.Contains(connections[key], value[j]) {
+				connectedToAll := true
+				for k := range cycle {
+					if !slices.Contains(connections[value[j]], cycle[k]) {
+						connectedToAll = false
+						break
+					}
+				}
+
+				if connectedToAll {
+					cycle = append(cycle, value[j])
+				}
+			}
+		}
+
+		sort.Strings(cycle)
+		if len(cycle) > nLargest {
+			bestList = cycle
+			nLargest = len(cycle)
+		}
+
+		if printout {
+			fmt.Println(key, "->", cycle)
+		}
+	}
+
+	out := strings.Join(bestList, ",")
+	return out
 }
 
 func main() {
@@ -191,13 +244,13 @@ func main() {
 	fmt.Println("Solution part 1 =", sol1, "(ET =", dur, ")")
 
 	// ---------------------------------------------
-	// fmt.Println()
-	// fmt.Println("=== Part 2 ===")
-	// sol2_1_test := solve2(dataTest2, 2000, true)
-	// fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
+	fmt.Println()
+	fmt.Println("=== Part 2 ===")
+	sol2_1_test := solve2(dataTest, true)
+	fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolutionStr(sol2_1_test, testSolution2))
 
-	// t1 = time.Now()
-	// sol2 := solve2(data, 2000, false)
-	// dur = time.Since(t1)
-	// fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
+	t1 = time.Now()
+	sol2 := solve2(data, false)
+	dur = time.Since(t1)
+	fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
 }
