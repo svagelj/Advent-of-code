@@ -117,49 +117,39 @@ func solve1(towels []string, patterns []string, printout bool) int {
 
 //----------------------------------------
 
-func countPossibleSolutions(towels []string, pattern string, nPossible int, cache map[string](int)) int {
-	// fmt.Println("Process pattern:", pattern)
+func countPossibleSolutions(towels []string, pattern string, cache map[string](int)) (int, map[string](int)) {
 
 	// reading from cache first
 	value, found := cache[pattern]
 	if found {
-		// fmt.Println("  read from cache:", pattern, value, nPossible)
-		nPossible = nPossible + value
-		return nPossible
+		return value, cache
 	}
 
-	_nPossible := 0	// local counter
+	var _nPoss int
+	nPossible := 0	// local counter
 	for i := range towels {
-		t := towels[i]
 
 		// exit condition
-		if t == pattern {
-			nPossible++
-			return nPossible
+		// if towels[i] == pattern {return +1} - this is not ok because there are possibilities for other matches as well (br, b+r)
+		if len(pattern) == 0 {
+			return 1, cache
 		}
 
-		if len(pattern) > len(t) && t == pattern[:len(t)] {
+		if len(pattern) >= len(towels[i]) && towels[i] == pattern[:len(towels[i])] {
 			// current towel matches the beginning of the pattern
-			// call next iteration
-			_nPoss := countPossibleSolutions(towels, pattern[len(t):], 0, cache)
-			_nPossible = _nPossible + _nPoss
+			// call next iteration with pattern without it's beginning as matched with the towel
+			_nPoss, cache = countPossibleSolutions(towels, pattern[len(towels[i]):], cache)
 			nPossible = nPossible + _nPoss
 		} 
 	}
 
 	// save to cache after all possible starting towels were processed
-	if len(pattern) > 1 {
-		_, found := cache[pattern]
-		if !found {
-			// fmt.Println("   create cache:", pattern, _nPossible)
-			cache[pattern] = _nPossible
-		} else {
-			// fmt.Println("\tfound!", cache[pattern], pattern)
-			panic("so sad")
-		}
+	_, f := cache[pattern]
+	if !f {
+		cache[pattern] = nPossible
 	}
 
-	return nPossible
+	return nPossible, cache
 }
 
 func solve2(towels []string, patterns []string, printout bool) int {
@@ -170,10 +160,11 @@ func solve2(towels []string, patterns []string, printout bool) int {
 	}
 
 	cache := make(map[string](int))
+	var nPossible int
 
 	sum := 0
 	for k := 0; k < len(patterns); k++ {
-		nPossible := countPossibleSolutions(towels, patterns[k], 0, cache) 
+		nPossible, cache = countPossibleSolutions(towels, patterns[k], cache) 
 
 		if printout {
 			fmt.Println(patterns[k], "->", nPossible)
@@ -211,7 +202,7 @@ func main() {
 	fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
 
 	t1 = time.Now()
-	sol2 := solve2(towels, patterns, false)		// 397960320739899 is too low
+	sol2 := solve2(towels, patterns, false)
 	dur = time.Since(t1)
 	fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
 }
