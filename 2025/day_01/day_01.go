@@ -1,7 +1,7 @@
 package main
 
 import (
-	// Math "aoc_2025/tools/Math"
+	Math "aoc_2025/tools/Math"
 	// Array "aoc_2025/tools/Array"
 	// Printer "aoc_2025/tools/Printer"
 	rw "aoc_2025/tools/rw"
@@ -31,7 +31,7 @@ var testData = []string {
 }
 
 
-var testSolution1, testSolution2 = 3, -1
+var testSolution1, testSolution2 = 3, 6
 
 //------------------------------------------------------
 
@@ -109,13 +109,49 @@ func solve1(rotations []int, startValue int, printout bool) int {
 
 //----------------------------------------
 
-func solve2(data [][]string, printout bool) int {
+func solve2(rotations []int, startValue int, printout bool) int {
 
 	if printout {
-		fmt.Println("data:", data)
+		fmt.Println("rotations:", rotations)
 	}
 
 	sum := 0
+
+	minValue := 0
+	maxValue := 99
+	currentValue := startValue
+
+	for i := range rotations {
+
+		lastZero := currentValue == 0
+
+		nPasses := rotations[i] / (maxValue-minValue + 1)
+		sum = sum + Math.AbsInt(nPasses)
+
+		rot := rotations[i] % (maxValue-minValue + 1)
+		currentValue = currentValue + rot
+
+		if currentValue > maxValue {
+			currentValue = currentValue%(maxValue-minValue + 1)
+			if currentValue != 0 && !lastZero {
+				sum = sum + 1
+			}
+		} else if currentValue < minValue {
+			currentValue = maxValue + currentValue + 1
+			if currentValue != 0 && !lastZero {
+				sum = sum + 1
+			}
+		}
+
+		if printout {
+			fmt.Println("rotation",  rotations[i], "=", rot, "->", currentValue, nPasses)
+		}
+
+		if currentValue == 0 {
+			sum = sum + 1
+		}
+	}
+
 	return sum
 }
 
@@ -139,13 +175,13 @@ func main() {
 	fmt.Println("Solution part 1 =", sol1, "(ET =", dur, ")")
 
 	// ---------------------------------------------
-	// fmt.Println()
-	// fmt.Println("=== Part 2 ===")
-	// sol2_1_test := solve2(dataTest, true)
-	// fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolutionStr(sol2_1_test, testSolution2))
+	fmt.Println()
+	fmt.Println("=== Part 2 ===")
+	sol2_1_test := solve2(rotationsTest, 50, true)
+	fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
 
-	// t1 = time.Now()
-	// sol2 := solve2(data, false)
-	// dur = time.Since(t1)
-	// fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
+	t1 = time.Now()
+	sol2 := solve2(rotations1, 50, false)
+	dur = time.Since(t1)
+	fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
 }
