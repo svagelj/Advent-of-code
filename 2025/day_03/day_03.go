@@ -65,7 +65,6 @@ func getBiggestValue(batteryBank string) (int, int) {
 		}
 	}
 
-	// fmt.Println("max value", batteryBank, int(batteryBank[maxInt]) - '0')
 	return maxInt, int(batteryBank[maxInt]) - '0'
 }
 
@@ -78,14 +77,14 @@ func solve1(batteryBanks []string, printout bool) int {
 	sum := 0
 	for i := range batteryBanks {
 
-		firstNumberInt := -1
+		firstNumberInd := -1
 		firstNumberValue := -1
 
 		currentBatteryBank := batteryBanks[i]
 		n := len(currentBatteryBank)
-		firstNumberInt, firstNumberValue = getBiggestValue(currentBatteryBank[:n-1])
+		firstNumberInd, firstNumberValue = getBiggestValue(currentBatteryBank[:n-1])
 
-		_, secondNumberValue := getBiggestValue(batteryBanks[i][firstNumberInt+1:])
+		_, secondNumberValue := getBiggestValue(batteryBanks[i][firstNumberInd+1:])
 
 		bestCombinationValue := firstNumberValue*10 + secondNumberValue
 		if printout {
@@ -100,43 +99,73 @@ func solve1(batteryBanks []string, printout bool) int {
 
 //----------------------------------------
 
-func solve2(intervals [][]int, printout bool) int {
+func solve2(batteryBanks []string, printout bool) int {
 
 	if printout {
-		fmt.Println("intervals:", intervals)
+		fmt.Println("battery bank:", batteryBanks)
 	}
 
+	nDigits := 12
+
 	sum := 0
+	for i := range batteryBanks {
+
+		chosenDigits := ""
+
+		currentInd := 0
+		for j := range nDigits {
+			searchString := batteryBanks[i][currentInd:]
+			n := len(searchString)
+			searchString = searchString[:n-(nDigits-j-1)]
+			
+			foundInd, _ := getBiggestValue(searchString)
+			chosenDigits = chosenDigits + string(searchString[foundInd])
+
+			currentInd = currentInd + foundInd + 1
+		}
+
+		chosenDigitsInt, err := strconv.Atoi(chosenDigits)
+		if err != nil {
+			panic(err)
+		}
+
+		if printout {
+			fmt.Println(batteryBanks[i], "->", chosenDigits, chosenDigitsInt)
+		}
+
+		sum = sum + chosenDigitsInt
+	}
+
 	return sum
 }
 
 func main() {
 
 	// data gathering and parsing
-	intervalsTest := initData(testData)
+	batteryBanksTest := initData(testData)
 
 	fileName := "day_03_data.txt"
 	fileData := rw.ReadFile(fileName)
-	intervals1 := initData(fileData)
+	batteryBanks1 := initData(fileData)
 
 	// ---------------------------------------------
 	fmt.Println("=== Part 1 ===")
-	sol1_1_test := solve1(intervalsTest, true)
+	sol1_1_test := solve1(batteryBanksTest, true)
 	fmt.Println("Test solution 1 =", sol1_1_test, "->", checkSolution(sol1_1_test, testSolution1))
 
 	t1 := time.Now()
-	sol1 := solve1(intervals1, false)
+	sol1 := solve1(batteryBanks1, false)
 	dur := time.Since(t1)
 	fmt.Println("Solution part 1 =", sol1, "(ET =", dur, ")")
 
 	// ---------------------------------------------
-	// fmt.Println()
-	// fmt.Println("=== Part 2 ===")
-	// sol2_1_test := solve2(intervalsTest, true)
-	// fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
+	fmt.Println()
+	fmt.Println("=== Part 2 ===")
+	sol2_1_test := solve2(batteryBanksTest, true)
+	fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
 
-	// t1 = time.Now()
-	// sol2 := solve2(intervals1, false)
-	// dur = time.Since(t1)
-	// fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
+	t1 = time.Now()
+	sol2 := solve2(batteryBanks1, false)
+	dur = time.Since(t1)
+	fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
 }
