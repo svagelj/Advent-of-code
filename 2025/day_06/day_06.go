@@ -3,7 +3,7 @@ package main
 import (
 	// Math "aoc_2025/tools/Math"
 	// Array "aoc_2025/tools/Array"
-	// Printer "aoc_2025/tools/Printer"
+	Printer "aoc_2025/tools/Printer"
 	rw "aoc_2025/tools/rw"
 	"time"
 
@@ -19,13 +19,13 @@ import (
 
 // var must be used for global variables
 var testData = []string {
-	"123 328  51 64" ,
-	"45 64  387 23",
-	"6 98  215 314",
-	"*   +   *   +" ,
+	"123 328  51 64 " ,
+	" 45 64  387 23 ",
+	"  6 98  215 314",
+	"*   +   *   +  " ,
 }
 
-var testSolution1, testSolution2 = 4277556, -1
+var testSolution1, testSolution2 = 4277556, 3263827
 
 //------------------------------------------------------
 
@@ -111,13 +111,77 @@ func solve1(values [][]int, operations []string, printout bool) int {
 }
 
 //----------------------------------------
-func solve2(ranges [][]int, printout bool) int {
+func initData2(fileLines []string) ([][]string) {
 
-	if printout {
-		fmt.Println(ranges)
+	data := [][]string {}
+
+	for i := range fileLines {
+		line := fileLines[i]
+		
+		_line := []string {}
+		for _, v := range line {
+			_line = append(_line, string(v))
+		}
+		data = append(data, _line)
 	}
 
+	return data
+}
+
+func solve2(data [][]string, printout bool) int {
+
+	if printout {
+		Printer.PrintGridStr(data, 1)
+	}
+
+	maxY := len(data)
+
 	sum := 0
+
+	numList := []int {}
+	// loop from right to left
+	for j := len(data[0]) - 1; j >= 0; j-- {
+		
+		currNumStr := ""
+		// loop from top to bottom
+		for i := 0; i < len(data)-1; i++ {
+			if data[i][j] != " " {
+				currNumStr = currNumStr + data[i][j]
+			}
+		}
+
+		value, err := strconv.Atoi(currNumStr)
+		if err != nil {
+			panic(err)
+		}
+		numList = append(numList, value)
+		
+		// sum if last element is operation char
+		oper := data[maxY-1][j]
+		if oper == "*" || oper == "+" {
+			var result int
+			if oper == "*" {
+				result = 1
+				for _,num := range numList {
+					result = result * num
+				}
+			} else if oper == "+" {
+				result = 0
+				for _,num := range numList {
+					result = result + num
+				}
+			}
+
+			if printout {
+				fmt.Println(oper, numList, "->", result)
+			}
+
+			sum = sum + result
+			numList = []int {}
+			j = j - 1	// skip empty column
+		}
+	}
+
 	return sum
 }
 
@@ -141,13 +205,17 @@ func main() {
 	fmt.Println("Solution part 1 =", sol1, "(ET =", dur, ")")
 
 	// ---------------------------------------------
-	// fmt.Println()
-	// fmt.Println("=== Part 2 ===")
-	// sol2_1_test := solve2(rangesTest, true)
-	// fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
+	// fmt.Println("-----------------------")
+	dataTest2 := initData2(testData)
+	data2 := initData2(fileData)
 
-	// t1 = time.Now()
-	// sol2 := solve2(rollsMap1, rollsPos1, rollsChar, false)
-	// dur = time.Since(t1)
-	// fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
+	fmt.Println()
+	fmt.Println("=== Part 2 ===")
+	sol2_1_test := solve2(dataTest2, true)
+	fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
+
+	t1 = time.Now()
+	sol2 := solve2(data2, false)
+	dur = time.Since(t1)
+	fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
 }

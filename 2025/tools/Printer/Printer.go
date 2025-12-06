@@ -27,6 +27,16 @@ func PrintGridInt(grid [][]int, pad int){
 	}
 }
 
+func PrintGridStr(grid [][]string, pad int){
+
+	for i := range grid {
+		for j:= range grid[i] {
+			fmt.Printf("%*s", pad, grid[i][j])
+		}
+		fmt.Printf("\n")
+	}
+}
+
 func PrintRegion(nodes [][2]int, M int, N int, pad int) {
 
 	area := Array.InitArrayValuesRune(M,N, '.')
