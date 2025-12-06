@@ -79,8 +79,8 @@ func initData(fileLines []string) ([][]int, []string) {
 func solve1(values [][]int, operations []string, printout bool) int {
 
 	if printout {
-		fmt.Println("ranges", values)
-		fmt.Println("values", operations)
+		fmt.Println("values", values)
+		fmt.Println("operations", operations)
 	}
 
 	sum := 0
