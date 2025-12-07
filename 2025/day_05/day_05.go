@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"strconv"
 
-	// "slices"
+	"slices"
 	// "sort"
 	"strings"
 	// "bufio"
@@ -32,7 +32,7 @@ var testData = []string {
 	"32",
 }
 
-var testSolution1, testSolution2 = 3, -1
+var testSolution1, testSolution2 = 3, 14
 
 //------------------------------------------------------
 
@@ -116,13 +116,96 @@ func solve1(ranges [][]int, values []int, printout bool) int {
 }
 
 //----------------------------------------
-func solve2(rollsMap [][]rune, rollsPositions [][]int, rollChar rune, printout bool) int {
+
+func sortRanges(ranges [][]int) [][]int {
+
+	sorted := [][]int {}
+
+	for i := range ranges {
+
+		// get index to insert current range
+		j := 0
+		for j < len(sorted) {
+
+			if sorted[j][0] > ranges[i][0] {
+				break
+			}
+
+			j = j + 1
+		}
+
+		// insert new range in its place
+		_sorted := slices.Clone(sorted[:j])
+		_sorted = append(_sorted, ranges[i])
+
+		if j < len(sorted) {
+			_sorted = append(_sorted, sorted[j:]...)
+		}
+		
+		sorted = _sorted
+	}
+
+	return sorted
+}
+
+func solve2(ranges [][]int, printout bool) int {
 
 	if printout {
-		fmt.Println(rollsPositions)
+		fmt.Println(ranges)
+	}
+
+	// First sort ranges by lower boundary
+	sortedRanges := sortRanges(ranges)
+
+	simplifiedRanges := [][]int {}
+	for i := range sortedRanges {
+
+		if i == 0 {
+			simplifiedRanges = append(simplifiedRanges, sortedRanges[i])
+		} else {
+			_range := sortedRanges[i]
+			
+			foundOverlap := false
+			for j := range simplifiedRanges {
+				rangeSimp := simplifiedRanges[j]
+
+				if _range[1] > rangeSimp[1] && _range[0] <= rangeSimp[1]  {
+					// check _range overlaps upper bounds
+					simplifiedRanges[j][1] = _range[1]
+					foundOverlap = true
+				} else if _range[1] >= rangeSimp[0] && _range[0] < rangeSimp[0]  {
+					// check _range overlaps lower bounds
+					simplifiedRanges[j][0] = _range[0]
+					foundOverlap = true
+				} else if _range[0] == rangeSimp[0] && _range[1] > rangeSimp[1] {
+					// expanding upper limit (lower is the same point)
+					simplifiedRanges[j][1] = _range[1]
+					foundOverlap = true
+				} else if _range[1] == rangeSimp[1] && _range[0] < rangeSimp[0] {
+					// expanding lower limit (upper is the same point)
+					simplifiedRanges[j][0] = _range[0]
+					foundOverlap = true
+				}  else if _range[1] >= rangeSimp[1] && _range[0] <= rangeSimp[0] {
+					// _range is bigger than simplified range
+					simplifiedRanges[j] = _range
+					foundOverlap = true
+				} else if _range[1] <= rangeSimp[1] && _range[0] >= rangeSimp[0] {
+					// _range is inside of simplified range
+					foundOverlap = true
+				} 
+			}
+
+			if !foundOverlap {
+				simplifiedRanges = append(simplifiedRanges, _range)
+			}
+		}
 	}
 
 	sum := 0
+	for i := range simplifiedRanges {
+		_range := simplifiedRanges[i]
+		sum = sum + (_range[1]-_range[0] + 1)
+	}
 	return sum
 }
 
@@ -146,13 +229,13 @@ func main() {
 	fmt.Println("Solution part 1 =", sol1, "(ET =", dur, ")")
 
 	// ---------------------------------------------
-	// fmt.Println()
-	// fmt.Println("=== Part 2 ===")
-	// sol2_1_test := solve2(rollsMapTest, rollsPosTest, rollsChar, true)
-	// fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
+	fmt.Println()
+	fmt.Println("=== Part 2 ===")
+	sol2_1_test := solve2(rangesTest, true)
+	fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
 
-	// t1 = time.Now()
-	// sol2 := solve2(rollsMap1, rollsPos1, rollsChar, false)
-	// dur = time.Since(t1)
-	// fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
+	t1 = time.Now()
+	sol2 := solve2(ranges1, false)
+	dur = time.Since(t1)
+	fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
 }
