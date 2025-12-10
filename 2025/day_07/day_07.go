@@ -37,7 +37,7 @@ var testData = []string {
 	"...............",
 }
 
-var testSolution1, testSolution2 = 21, -1
+var testSolution1, testSolution2 = 21, 40
 
 //------------------------------------------------------
 
@@ -138,13 +138,59 @@ func solve1(diagram [][]rune, start []int, printout bool) int {
 
 //----------------------------------------
 
-func solve2(data [][]string, printout bool) int {
+func solve2(diagram [][]rune, start []int, printout bool) int {
 
 	if printout {
-		fmt.Println(data)
+		Printer.PrintGridRune(diagram, 1)
+		fmt.Println("start", start)
 	}
 
+	splitterChar := '^'
+	laserChar := '|'
+	sizeY := len(diagram)
+	laserPaths := Array.InitArrayValuesInt(len(diagram), len(diagram[0]), 0)
+
+	visitedSplitters := Array.InitArrayValuesInt(len(diagram), len(diagram[0]), 0)
+	laserPath := Array.CopyRune2D(diagram)
+
+	// put in start
+	laserPaths[start[0]][start[1]] = 1
+	laserPath[start[0]][start[1]] = laserChar
+
+	// Change the approach - do it line by line for all lasers
+	for i := range (sizeY-1) {
+
+		for j := range diagram[i] {
+			if laserPaths[i][j] == 0 {
+				continue
+			}
+
+			if diagram[i+1][j] == splitterChar {
+				// split the beam
+				visitedSplitters[i+1][j] = visitedSplitters[i+1][j] + laserPaths[i][j]
+				laserPaths[i+1][j+1] = laserPaths[i+1][j+1] + laserPaths[i][j]
+				laserPaths[i+1][j-1] = laserPaths[i+1][j-1] + laserPaths[i][j]
+			} else {
+				laserPaths[i+1][j] = laserPaths[i+1][j] + laserPaths[i][j]
+			}
+		}
+	}
+
+	if printout {
+		fmt.Println("Finished")
+		Printer.PrintGridRune(laserPath, 1)
+		fmt.Println()
+		Printer.PrintGridInt(visitedSplitters, 2)
+		fmt.Println()
+		Printer.PrintGridInt(laserPaths, 3)
+	}
+
+	// Sum last row
 	sum := 0
+	for i := range len(laserPaths[sizeY-1]) {
+		sum = sum + laserPaths[sizeY-1][i]
+	}
+
 	return sum
 }
 
@@ -162,8 +208,6 @@ func main() {
 	sol1_1_test := solve1(diagramTest1, startTest1, true)
 	fmt.Println("Test solution 1 =", sol1_1_test, "->", checkSolution(sol1_1_test, testSolution1))
 
-	// 1775 is too high
-
 	t1 := time.Now()
 	sol1 := solve1(diagram1, start1, false)
 	dur := time.Since(t1)
@@ -171,13 +215,13 @@ func main() {
 
 	// ---------------------------------------------
 
-	// fmt.Println()
-	// fmt.Println("=== Part 2 ===")
-	// sol2_1_test := solve2(dataTest2, true)
-	// fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
+	fmt.Println()
+	fmt.Println("=== Part 2 ===")
+	sol2_1_test := solve2(diagramTest1, startTest1, true)
+	fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
 
-	// t1 = time.Now()
-	// sol2 := solve2(data2, false)
-	// dur = time.Since(t1)
-	// fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
+	t1 = time.Now()
+	sol2 := solve2(diagram1, start1, false)
+	dur = time.Since(t1)
+	fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
 }
