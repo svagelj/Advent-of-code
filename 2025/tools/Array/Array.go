@@ -99,3 +99,33 @@ func CopyRune2D(data [][]rune) [][]rune {
 	}
 	return duplicate
 }
+
+func CopyString2D(data [][]string) [][]string {
+
+	duplicate := make([][]string, len(data))
+	for i := range data {
+		duplicate[i] = make([]string, len(data[i]))
+		copy(duplicate[i], data[i])
+	}
+	return duplicate
+}
+
+func CopyInt2D(data [][]int) [][]int {
+
+	duplicate := make([][]int, len(data))
+	for i := range data {
+		duplicate[i] = make([]int, len(data[i]))
+		copy(duplicate[i], data[i])
+	}
+	return duplicate
+}
+
+func CopyFloat642D(data [][]float64) [][]float64 {
+
+	duplicate := make([][]float64, len(data))
+	for i := range data {
+		duplicate[i] = make([]float64, len(data[i]))
+		copy(duplicate[i], data[i])
+	}
+	return duplicate
+}
