@@ -42,7 +42,7 @@ var testData = []string {
 	"425,690,689",
 }
 
-var testSolution1, testSolution2 = 40, -1
+var testSolution1, testSolution2 = 40, 25272
 
 //------------------------------------------------------
 
@@ -151,7 +151,7 @@ func areAlreadyConnected(p1 int, p2 int, circuits [][]int, nodes [][]int) bool {
 func solve1(nodes [][]int, nConnections int, printout bool) int {
 
 	if printout {
-		fmt.Println("start", nodes)
+		fmt.Println("nodes", nodes)
 		fmt.Println("n connections", nConnections)
 	}
 
@@ -237,7 +237,7 @@ func solve1(nodes [][]int, nConnections int, printout bool) int {
 			}
 
 			// merge to separate array
-			mergedCircuit := append([]int {}, _mergeCircuits[0]...)
+			mergedCircuit := slices.Clone(_mergeCircuits[0])
 			for _,v := range _mergeCircuits[1:] {
 				mergedCircuit = append(mergedCircuit, v...)
 			}
@@ -267,15 +267,119 @@ func solve1(nodes [][]int, nConnections int, printout bool) int {
 
 //----------------------------------------
 
-func solve2(diagram [][]rune, start []int, printout bool) int {
+func solve2(nodes [][]int, printout bool) int {
 
 	if printout {
-		fmt.Println("start", start)
+		fmt.Println("nodes", nodes)
 	}
 
-	sum := 0
+	// work with indexes of nodes not nodes themselves
+	nodesInd := []int {}
+	nodesLeftInd := []int {}
+	for i := range nodes {
+		nodesInd = append(nodesInd, i)
+		nodesLeftInd = append(nodesLeftInd, i)
+	}
 
-	return sum
+	// find distance between all pairs and order them once
+	pairs := getAllSortedPairs(nodes, nodesInd)
+
+	circuits := [][]int {}
+	maxConnections := 9999
+	k := 0
+	for k < maxConnections && k < len(pairs) {
+		
+		p1 := pairs[k][0]
+		p2 := pairs[k][1]
+
+		// remove p1 and p2 from nodes left to connect
+		if len(nodesLeftInd) > 0 {
+			_i := Array.GetIndexInt(nodesLeftInd, p1)
+			if _i != -1 {
+				nodesLeftInd = slices.Delete(nodesLeftInd, _i, _i+1)
+			}
+			_i = Array.GetIndexInt(nodesLeftInd, p2)
+			if _i != -1 {
+				nodesLeftInd = slices.Delete(nodesLeftInd, _i, _i+1)
+			}
+		}
+
+		// check if both p1 and p2 are already in the same circuit -> skip this pair
+		if areAlreadyConnected(p1, p2, circuits, nodes) {
+			if printout {
+				fmt.Println(k, "skip |", p1, p2,  nodes[p1], nodes[p2])
+				fmt.Println()
+			}
+			k = k + 1
+			continue
+		}
+
+		// find current two nodes in existing circuits
+		foundCircuits :=  [][]int {}
+		for i := range circuits {
+			currCircuit := slices.Clone(circuits[i])
+
+			if slices.Contains(currCircuit, p1) {
+				foundCircuits = append(foundCircuits, []int {i, p2})
+			} else if slices.Contains(currCircuit, p2) {
+				foundCircuits = append(foundCircuits, []int {i, p1})
+			}
+
+			if len(foundCircuits) >= 2 {
+				break
+			}
+		}
+
+		// adding current nodes to existing circuits
+		if len(foundCircuits) == 0 {
+			// add current pair as a new circuit
+			circuits = append(circuits, []int {p1,p2})
+		}else if len(foundCircuits) == 1 {
+			// add one node to existing one circuit
+			circuits[foundCircuits[0][0]] = append(circuits[foundCircuits[0][0]], foundCircuits[0][1])
+		} else {
+			// merge two circuits together as current nodes are in two circuits
+			
+			// refactor to simple 1d array/slice
+			foundCircuitsInd := []int {}
+			for i := range foundCircuits {
+				foundCircuitsInd = append(foundCircuitsInd, foundCircuits[i][0])
+			}
+
+			// separate circuits to merge and the rest
+			_circuits := [][]int {}
+			_mergeCircuits := [][] int{}
+			for i,v := range circuits {
+				if slices.Contains(foundCircuitsInd, i) {
+					_mergeCircuits = append(_mergeCircuits, v)
+				} else {
+					_circuits = append(_circuits, v)
+				}
+			}
+
+			// merge to separate array
+			mergedCircuit := slices.Clone(_mergeCircuits[0])
+			for _,v := range _mergeCircuits[1:] {
+				mergedCircuit = append(mergedCircuit, v...)
+			}
+
+			circuits = append(_circuits, mergedCircuit)
+		}
+
+		if printout {
+			fmt.Println(k, "|", p1,p2, "-", dist(nodes[p1], nodes[p2]), nodes[p1], nodes[p2])
+			fmt.Println("  circuits", circuits)
+			fmt.Println("      left", nodesLeftInd, len(nodesLeftInd))
+		}
+
+		if len(nodesLeftInd) == 0 && len(circuits) == 1 {
+			return nodes[p1][0] * nodes[p2][0]
+		}
+
+		k = k + 1
+	}
+
+	return -1
 }
 
 func main() {
@@ -299,13 +403,13 @@ func main() {
 
 	// ---------------------------------------------
 
-	// fmt.Println()
-	// fmt.Println("=== Part 2 ===")
-	// sol2_1_test := solve2(diagramTest1, startTest1, true)
-	// fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
+	fmt.Println()
+	fmt.Println("=== Part 2 ===")
+	sol2_1_test := solve2(nodesTest1, true)
+	fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
 
-	// t1 = time.Now()
-	// sol2 := solve2(diagram1, start1, false)
-	// dur = time.Since(t1)
-	// fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
+	t1 = time.Now()
+	sol2 := solve2(nodes1, false)
+	dur = time.Since(t1)
+	fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
 }
