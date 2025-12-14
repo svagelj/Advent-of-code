@@ -1,5 +1,9 @@
 package tools
 
+import (
+	"slices"
+)
+
 // Functions with names starting with upper case are exported
 
 func GetIndexInt(array []int, element int) int {
@@ -26,9 +30,18 @@ func GetIndexInt2D(array [][]int, element []int) int {
 	return -1
 }
 
-func GetIndexString(array string, element string) int {
+func GetIndexString(myString string, element string) int {
+	for i := range myString {
+		if myString[i] == element[0] {
+			return i
+		}
+	}
+	return -1
+}
+
+func GetIndexStringArray(array []string, element string) int {
 	for i := range array {
-		if array[i] == element[0] {
+		if array[i] == element {
 			return i
 		}
 	}
@@ -128,4 +141,26 @@ func CopyFloat642D(data [][]float64) [][]float64 {
 		copy(duplicate[i], data[i])
 	}
 	return duplicate
+}
+
+func SortBySizeInt2D(array2D [][]int) [][]int {
+
+	sorted := [][]int {}
+	for i:= range array2D {
+		j := 0
+		for j < len(sorted) {
+			if len(sorted[j]) < len(array2D[i]){
+				break
+			}
+			j=j+1
+		}
+		_sorted := append(slices.Clone(sorted[:j]), array2D[i])
+
+		if j < len(sorted){
+			_sorted = append(_sorted, sorted[j:]...)
+		}
+		sorted = _sorted
+	}
+
+	return sorted
 }
