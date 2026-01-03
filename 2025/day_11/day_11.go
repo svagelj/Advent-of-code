@@ -32,7 +32,23 @@ var testData = []string {
 	"iii: out",
 }
 
-var testSolution1, testSolution2 = 5, -1
+var testData2 = []string {
+	"svr: aaa bbb",
+	"aaa: fft",
+	"fft: ccc",
+	"bbb: tty",
+	"tty: ccc",
+	"ccc: ddd eee",
+	"ddd: hub",
+	"hub: fff",
+	"eee: dac",
+	"dac: fff",
+	"fff: ggg hhh",
+	"ggg: out",
+	"hhh: out",
+}
+
+var testSolution1, testSolution2 = 5, 2
 
 //------------------------------------------------------
 
@@ -59,7 +75,7 @@ func initData(fileLines []string) (map[string][](string)) {
 		outputs := []string {}
 		for _,v := range _line[1:] {
 			if slices.Contains(outputs, v){
-				fmt.Println("Duplicate nodes!!")
+				panic("Duplicate nodes!!")
 			} else {
 				outputs = append(outputs, v)
 			}
@@ -101,7 +117,7 @@ func solve1(nodes map[string][](string), printout bool) int {
 					fmt.Println("  we in a loop", route, nextNode)
 					continue
 				} else {
-					// newRoute must be copied independently
+					// newRoute must be copied to be independent
 					newRoute := make([]string, len(route))
 					copy(newRoute, route)
 					newRoute = append(newRoute, nextNode)
@@ -134,20 +150,81 @@ func solve1(nodes map[string][](string), printout bool) int {
 
 //----------------------------------------
 
-func solve2(nodes [][]int, printout bool) int {
+func findNumberOfPathsRecursive(nodes map[string][](string), startNode string, endNode string, memo map[string]([]int), depth int) int {
+
+	// assumptions 
+	// 1) every path that we are currently on must have reach the desired end node
+	// 2) if 1) is not true we are in a loop of infinite length, never reaches the end
+	// 3) memoization works on depth first search -> easier with recursion than queue
+
+	// memo key is for start node because end node is fixed
+	value, success := memo[startNode]
+	if success {
+		return value[0]
+	}
+
+	if startNode == endNode {
+		return 1
+	}
+
+	sum := 0
+	for _, nextNode := range nodes[startNode] {
+
+		if nextNode == endNode {
+			return 1
+		}
+
+		nPaths := findNumberOfPathsRecursive(nodes, nextNode, endNode, memo, depth+1)
+		sum = sum + nPaths
+	}
+
+	// update memo with current data
+	memo[startNode] = []int {sum}
+
+	return sum
+}
+
+func solve2(nodes map[string][](string), printout bool) int {
 
 	if printout {
-		fmt.Println("nodes", nodes)
+		fmt.Println("nodes:", nodes)
 	}
-	
-	sum := 0
-	return sum
+
+	// We have to get from 'svr' to 'out' but through two other nodes ('dac' and 'fft')
+	// this means that we can find number of paths for each of these sections: 
+	//	1) svr - fft (alternative: svr - dac)
+	//	2) fft - dac (alternative: dac - fft)
+	//	3) dac - out (alternative: fft - out)
+	// The result is multiplication of all three sectors plus multiplication of alternative path
+	// Number of paths for one of these two paths might always be 0
+
+	n11 := findNumberOfPathsRecursive(nodes, "svr", "fft", make(map[string]([]int)), 1)
+	n12 := findNumberOfPathsRecursive(nodes, "svr", "dac", make(map[string]([]int)), 1)
+	n21 := findNumberOfPathsRecursive(nodes, "fft", "dac", make(map[string]([]int)), 1)
+	n22 := findNumberOfPathsRecursive(nodes, "dac", "fft", make(map[string]([]int)), 1)
+	n31 := findNumberOfPathsRecursive(nodes, "dac", "out", make(map[string]([]int)), 1)
+	n32 := findNumberOfPathsRecursive(nodes, "fft", "out", make(map[string]([]int)), 1)
+
+	if printout {
+		fmt.Println("svr -> fft", n11)
+		fmt.Println("svr -> fft", n12)
+		fmt.Println("fft -> dac", n21)
+		fmt.Println("dac -> fft", n22)
+		fmt.Println("dac -> out", n31)
+		fmt.Println("fft -> out", n32)
+
+		fmt.Println("a) svr - fft - dac - out", n11*n21*n31)
+		fmt.Println("b) svr - dac - fft - out", n12*n22*n32)
+	}
+
+	return n11*n21*n31 + n12*n22*n32
 }
 
 func main() {
 
 	// data gathering and parsing
 	nodesTest1 := initData(testData)
+	nodesTest2 := initData(testData2)
 
 	fileName := "day_11_data.txt"
 	fileData := rw.ReadFile(fileName)
@@ -165,13 +242,13 @@ func main() {
 
 	// ---------------------------------------------
 
-	// fmt.Println()
-	// fmt.Println("=== Part 2 ===")
-	// sol2_1_test := solve2(nodesTest1, true)
-	// fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
+	fmt.Println()
+	fmt.Println("=== Part 2 ===")
+	sol2_1_test := solve2(nodesTest2, true)
+	fmt.Println("Test solution 2 =", sol2_1_test, "->", checkSolution(sol2_1_test, testSolution2))
 
-	// t1 = time.Now()
-	// sol2 := solve2(diagram1, start1, false)
-	// dur = time.Since(t1)
-	// fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
+	t1 = time.Now()
+	sol2 := solve2(nodes1, false)
+	dur = time.Since(t1)
+	fmt.Println("Solution part 2 =", sol2, "(ET =", dur, ")")
 }
